@@ -16,7 +16,12 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.WindowManager
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
+import android.graphics.PorterDuff
+import android.graphics.Typeface
 import androidx.core.app.NotificationCompat
 import dev.overlaypen.app.MainActivity
 import dev.overlaypen.app.R
@@ -78,8 +83,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
     }
 
     override fun onCollapsePalette() {
-        paletteCollapsed = true
-        showPaletteOverlay()
+        collapseIntoPassiveToolsChip()
     }
 
     override fun onKeepAnnotations() {
@@ -109,13 +113,15 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             stopSelf()
             return
         }
+        paletteCollapsed = false
         removePassiveCanvas()
         removeBubble()
+        removePaletteChip()
         if (drawingCanvasView == null) {
             drawingCanvasView = OverlayCanvasView(this, session, acceptsInput = true)
             windowManager.addView(drawingCanvasView, createFullscreenParams(flags = interactiveFlags()))
         }
-        showPaletteOverlay()
+        showExpandedPalette()
     }
 
     private fun keepAnnotations() {
@@ -131,6 +137,19 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
     private fun clearAnnotations() {
         session.clear()
         removePassiveCanvas()
+    }
+
+    private fun collapseIntoPassiveToolsChip() {
+        paletteCollapsed = true
+        removeExpandedPalette()
+        drawingCanvasView?.let { windowManager.removeView(it) }
+        drawingCanvasView = null
+        if (session.hasStrokes()) {
+            showPassiveCanvas()
+        } else {
+            removePassiveCanvas()
+        }
+        showCollapsedPaletteChip()
     }
 
     private fun showBubble() {
@@ -194,21 +213,61 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
     }
 
     private fun createBubbleView(params: WindowManager.LayoutParams): View {
-        return BubbleTextView(this).apply {
-            text = getString(R.string.bubble_label)
-            textSize = 14f
-            setTextColor(0xFFFFFFFF.toInt())
-            setPadding(dp(18), dp(14), dp(18), dp(14))
+        return LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(12), dp(10), dp(14), dp(10))
             background = getDrawable(R.drawable.floating_bubble_bg)
-            elevation = 18f
-            onPerformClick = { enterDrawingMode() }
+            elevation = 20f
+            setOnClickListener { enterDrawingMode() }
+
+            addView(
+                FrameLayout(context).apply {
+                    layoutParams = LinearLayout.LayoutParams(dp(38), dp(38))
+                    background = context.getDrawable(R.drawable.floating_bubble_orb_bg)
+
+                    addView(
+                        ImageView(context).apply {
+                            layoutParams = FrameLayout.LayoutParams(dp(18), dp(18), Gravity.CENTER)
+                            setImageResource(android.R.drawable.ic_menu_edit)
+                            setColorFilter(0xFFFFFFFF.toInt(), PorterDuff.Mode.SRC_IN)
+                        },
+                    )
+
+                    addView(
+                        View(context).apply {
+                            layoutParams = FrameLayout.LayoutParams(dp(10), dp(10), Gravity.END or Gravity.BOTTOM).also {
+                                it.marginEnd = dp(2)
+                                it.bottomMargin = dp(2)
+                            }
+                            background = context.getDrawable(R.drawable.floating_bubble_dot_bg)
+                        },
+                    )
+                },
+            )
+
+            addView(
+                TextView(context).apply {
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                    ).also {
+                        it.marginStart = dp(10)
+                    }
+                    text = getString(R.string.bubble_label)
+                    textSize = 14f
+                    letterSpacing = 0.02f
+                    setTypeface(typeface, Typeface.BOLD)
+                    setTextColor(0xFFFFFFFF.toInt())
+                },
+            )
         }.also { bubble ->
             attachDragTouchListener(
                 touchTarget = bubble,
                 windowView = bubble,
                 params = params,
-                fallbackWidthPx = dp(108),
-                fallbackHeightPx = dp(56),
+                fallbackWidthPx = dp(126),
+                fallbackHeightPx = dp(58),
                 snapToHorizontalEdge = true,
             ) { x, y ->
                 bubblePositionX = x
@@ -307,14 +366,6 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             .build()
     }
 
-    private fun showPaletteOverlay() {
-        if (paletteCollapsed) {
-            showCollapsedPaletteChip()
-        } else {
-            showExpandedPalette()
-        }
-    }
-
     private fun showExpandedPalette() {
         removePaletteChip()
         if (toolPaletteView != null) {
@@ -357,24 +408,54 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
     }
 
     private fun createPaletteChipView(params: WindowManager.LayoutParams): View {
-        return BubbleTextView(this).apply {
-            text = getString(R.string.palette_chip_label)
-            textSize = 13f
-            setTextColor(0xFFFFFFFF.toInt())
-            setPadding(dp(16), dp(12), dp(16), dp(12))
+        return LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(12), dp(10), dp(14), dp(10))
             background = getDrawable(R.drawable.overlay_chip_bg)
-            elevation = 16f
-            onPerformClick = {
+            elevation = 18f
+            setOnClickListener {
                 paletteCollapsed = false
-                showPaletteOverlay()
+                enterDrawingMode()
             }
+
+            addView(
+                FrameLayout(context).apply {
+                    layoutParams = LinearLayout.LayoutParams(dp(34), dp(34))
+                    background = context.getDrawable(R.drawable.overlay_chip_orb_bg)
+
+                    addView(
+                        ImageView(context).apply {
+                            layoutParams = FrameLayout.LayoutParams(dp(16), dp(16), Gravity.CENTER)
+                            setImageResource(android.R.drawable.ic_menu_manage)
+                            setColorFilter(0xFFFFFFFF.toInt(), PorterDuff.Mode.SRC_IN)
+                        },
+                    )
+                },
+            )
+
+            addView(
+                TextView(context).apply {
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                    ).also {
+                        it.marginStart = dp(10)
+                    }
+                    text = getString(R.string.palette_chip_label)
+                    textSize = 13f
+                    letterSpacing = 0.02f
+                    setTypeface(typeface, Typeface.BOLD)
+                    setTextColor(0xFFFFFFFF.toInt())
+                },
+            )
         }.also { chip ->
             attachDragTouchListener(
                 touchTarget = chip,
                 windowView = chip,
                 params = params,
-                fallbackWidthPx = dp(90),
-                fallbackHeightPx = dp(48),
+                fallbackWidthPx = dp(112),
+                fallbackHeightPx = dp(54),
                 snapToHorizontalEdge = true,
             ) { x, y ->
                 palettePositionX = x

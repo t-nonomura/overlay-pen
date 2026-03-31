@@ -1,5 +1,7 @@
 package dev.overlaypen.app.model
 
+import dev.overlaypen.app.R
+
 enum class ToolMode {
     PEN,
     ERASER,
@@ -17,10 +19,10 @@ enum class PenType {
         DASHED -> SOLID
     }
 
-    fun label(): String = when (this) {
-        SOLID -> "Solid"
-        HIGHLIGHTER -> "Highlighter"
-        DASHED -> "Dashed"
+    fun labelResId(): Int = when (this) {
+        SOLID -> R.string.pen_type_solid
+        HIGHLIGHTER -> R.string.pen_type_highlighter
+        DASHED -> R.string.pen_type_dashed
     }
 }
 

@@ -39,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
+import androidx.compose.ui.res.stringResource
 import dev.overlaypen.app.overlay.OverlayService
 
 class MainActivity : ComponentActivity() {
@@ -137,12 +138,12 @@ private fun OverlayPenHome(
         ) {
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "Overlay Pen",
+                text = stringResource(R.string.home_title),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
             )
             Text(
-                text = "A floating annotation tool for Android 12+ that keeps taps working by capping passive overlay opacity.",
+                text = stringResource(R.string.home_description),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
             )
@@ -155,14 +156,22 @@ private fun OverlayPenHome(
                     onClick = if (overlayPermissionGranted) onStartOverlay else onRequestPermission,
                     modifier = Modifier.weight(1f),
                 ) {
-                    Text(if (overlayPermissionGranted) "Start overlay" else "Grant permission")
+                    Text(
+                        stringResource(
+                            if (overlayPermissionGranted) {
+                                R.string.home_start_overlay
+                            } else {
+                                R.string.home_request_permission
+                            },
+                        ),
+                    )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Button(
                     onClick = onStopOverlay,
                     modifier = Modifier.weight(1f),
                 ) {
-                    Text("Stop overlay")
+                    Text(stringResource(R.string.home_stop_overlay))
                 }
             }
         }
@@ -180,16 +189,18 @@ private fun StatusCard(overlayPermissionGranted: Boolean) {
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
-                text = "Permission status",
+                text = stringResource(R.string.status_card_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
-                text = if (overlayPermissionGranted) {
-                    "Overlay permission is ready. You can start the floating bubble now."
-                } else {
-                    "Overlay permission is still off. The system settings screen is required before the bubble can appear."
-                },
+                text = stringResource(
+                    if (overlayPermissionGranted) {
+                        R.string.status_card_granted
+                    } else {
+                        R.string.status_card_missing
+                    },
+                ),
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
@@ -207,19 +218,19 @@ private fun SpecificationCard() {
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(
-                text = "Prototype behavior",
+                text = stringResource(R.string.spec_card_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold,
                 color = Color.White,
             )
-            SpecLine("Floating bubble opens drawing mode over any app.")
-            SpecLine("Drawing mode blocks the underlying app to avoid accidental taps.")
-            SpecLine("Passive mode keeps strokes visible with window alpha fixed at 0.78.")
-            SpecLine("The tool panel can be dragged away from the drawing area.")
-            SpecLine("The full tool panel can collapse into a compact Tools chip.")
-            SpecLine("Clear removes all strokes without ending the session.")
-            SpecLine("Leaving the service removes every stroke from memory.")
-            SpecLine("Tools include pen, eraser, undo, clear, width, opacity, color, and pen type.")
+            SpecLine(stringResource(R.string.spec_line_1))
+            SpecLine(stringResource(R.string.spec_line_2))
+            SpecLine(stringResource(R.string.spec_line_3))
+            SpecLine(stringResource(R.string.spec_line_4))
+            SpecLine(stringResource(R.string.spec_line_5))
+            SpecLine(stringResource(R.string.spec_line_6))
+            SpecLine(stringResource(R.string.spec_line_7))
+            SpecLine(stringResource(R.string.spec_line_8))
         }
     }
 }

@@ -37,15 +37,15 @@ class ToolPaletteView(
     private val inactiveButtonTint = "#D9E2EC".toColorInt()
     private val colorSwatches = mutableMapOf<Int, View>()
 
-    private val penButton = paletteButton("Pen") { session.updateTool(ToolMode.PEN) }
-    private val eraserButton = paletteButton("Eraser") { session.updateTool(ToolMode.ERASER) }
-    private val undoButton = paletteButton("Undo") { session.undo() }
-    private val typeButton = paletteButton("Type") { session.cyclePenType() }
-    private val clearButton = paletteButton("Clear") { callbacks.onClearAnnotations() }
-    private val keepButton = paletteButton("Keep") { callbacks.onKeepAnnotations() }
-    private val closeButton = paletteButton("Close") { callbacks.onStopOverlay() }
-    private val dragHandle = paletteHandle("Move")
-    private val collapseHandle = paletteHandle("Hide") { callbacks.onCollapsePalette() }
+    private val penButton = paletteButton(context.getString(R.string.palette_pen)) { session.updateTool(ToolMode.PEN) }
+    private val eraserButton = paletteButton(context.getString(R.string.palette_eraser)) { session.updateTool(ToolMode.ERASER) }
+    private val undoButton = paletteButton(context.getString(R.string.palette_undo)) { session.undo() }
+    private val typeButton = paletteButton(context.getString(R.string.tool_type_format, "")) { session.cyclePenType() }
+    private val clearButton = paletteButton(context.getString(R.string.palette_clear)) { callbacks.onClearAnnotations() }
+    private val keepButton = paletteButton(context.getString(R.string.palette_keep)) { callbacks.onKeepAnnotations() }
+    private val closeButton = paletteButton(context.getString(R.string.palette_close)) { callbacks.onStopOverlay() }
+    private val dragHandle = paletteHandle(context.getString(R.string.palette_move))
+    private val collapseHandle = paletteHandle(context.getString(R.string.palette_hide)) { callbacks.onCollapsePalette() }
     private val widthValue = paletteLabel("")
     private val opacityValue = paletteLabel("")
     private val widthSeekBar = SeekBar(context)
@@ -53,12 +53,12 @@ class ToolPaletteView(
     private val sessionListener: () -> Unit = { post(::refreshFromSession) }
 
     private val paletteColors = listOf(
-        0xFFE4572E.toInt(),
-        0xFF005F73.toInt(),
-        0xFF2A9D8F.toInt(),
-        0xFFF4A261.toInt(),
         0xFF111827.toInt(),
         0xFFFFFFFF.toInt(),
+        0xFF0F766E.toInt(),
+        0xFF2563EB.toInt(),
+        0xFFDC2626.toInt(),
+        0xFFF59E0B.toInt(),
     )
 
     init {
@@ -78,11 +78,11 @@ class ToolPaletteView(
         addView(spacer(12))
         addView(colorRow())
         addView(spacer(12))
-        addView(settingRow("Width", widthValue))
+        addView(settingRow(context.getString(R.string.palette_width), widthValue))
         configureWidthSeekBar()
         addView(widthSeekBar)
         addView(spacer(8))
-        addView(settingRow("Opacity", opacityValue))
+        addView(settingRow(context.getString(R.string.palette_opacity), opacityValue))
         configureOpacitySeekBar()
         addView(opacitySeekBar)
 
@@ -167,7 +167,7 @@ class ToolPaletteView(
         return LinearLayout(context).apply {
             orientation = HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            addView(paletteLabel("Overlay Pen", 18f, true).apply {
+            addView(paletteLabel(context.getString(R.string.palette_title), 18f, true).apply {
                 layoutParams = LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f)
             })
             addView(dragHandle)
@@ -257,7 +257,7 @@ class ToolPaletteView(
         undoButton.alpha = if (hasStrokes) 1f else 0.55f
         clearButton.alpha = if (hasStrokes) 1f else 0.55f
         keepButton.alpha = if (hasStrokes) 1f else 0.55f
-        typeButton.text = context.getString(R.string.tool_type_format, brush.penType.label())
+        typeButton.text = context.getString(R.string.tool_type_format, context.getString(brush.penType.labelResId()))
         widthValue.text = context.getString(R.string.tool_width_format, brush.strokeWidthDp.toInt())
         opacityValue.text = context.getString(R.string.tool_opacity_format, (brush.opacity * 100).toInt())
         widthSeekBar.progress = (brush.strokeWidthDp - 2f).toInt()
