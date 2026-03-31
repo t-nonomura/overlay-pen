@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Overlay Pen</string>
+    <string name="overlay_permission_required">Overlay permission is required.</string>
+    <string name="overlay_started">Overlay session started.</string>
+    <string name="overlay_stopped">Overlay session stopped.</string>
+    <string name="bubble_label">Draw</string>
+    <string name="notification_channel_name">Overlay session</string>
+    <string name="notification_title">Overlay Pen is active</string>
+    <string name="notification_body">Tap Resume to draw or Stop to clear every stroke.</string>
+    <string name="notification_action_resume">Resume</string>
+    <string name="notification_action_stop">Stop</string>
+    <string name="tool_type_format">Type: %1$s</string>
+    <string name="tool_width_format">%1$d</string>
+    <string name="tool_opacity_format">%1$d%%</string>
+</resources>

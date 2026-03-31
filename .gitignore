@@ -1,0 +1,15 @@
+# Android / Gradle
+.gradle/
+.kotlin/
+build/
+local.properties
+*.iml
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+Desktop.ini
