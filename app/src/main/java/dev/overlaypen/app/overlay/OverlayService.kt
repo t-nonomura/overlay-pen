@@ -9,7 +9,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.graphics.PixelFormat
-import android.os.Build
 import android.os.IBinder
 import android.provider.Settings
 import android.view.Gravity
@@ -33,6 +32,10 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
     private var passiveCanvasView: OverlayCanvasView? = null
     private var drawingCanvasView: OverlayCanvasView? = null
     private var toolPaletteView: ToolPaletteView? = null
+    private var bubblePositionX: Int? = null
+    private var bubblePositionY: Int? = null
+    private var palettePositionX: Int? = null
+    private var palettePositionY: Int? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -48,6 +51,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
                 enterDrawingMode()
             }
 
+            ACTION_CLEAR -> clearAnnotations()
             ACTION_STOP -> stopSelf()
         }
         return START_NOT_STICKY
@@ -60,6 +64,10 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    override fun onClearAnnotations() {
+        clearAnnotations()
+    }
 
     override fun onKeepAnnotations() {
         keepAnnotations()
@@ -96,7 +104,12 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
         }
         if (toolPaletteView == null) {
             toolPaletteView = ToolPaletteView(this, session, this)
-            windowManager.addView(toolPaletteView, createPaletteParams())
+            val paletteParams = createPaletteParams()
+            windowManager.addView(toolPaletteView, paletteParams)
+            attachDragTouchListener(toolPaletteView!!.dragHandleView(), toolPaletteView!!, paletteParams) { x, y ->
+                palettePositionX = x
+                palettePositionY = y
+            }
         }
     }
 
@@ -108,6 +121,11 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
         } else {
             removePassiveCanvas()
         }
+    }
+
+    private fun clearAnnotations() {
+        session.clear()
+        removePassiveCanvas()
     }
 
     private fun showBubble() {
@@ -122,8 +140,8 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             PixelFormat.TRANSLUCENT,
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = dp(24)
-            y = dp(160)
+            x = bubblePositionX ?: dp(24)
+            y = bubblePositionY ?: dp(160)
         }
         bubbleParams = params
         bubbleView = createBubbleView(params)
@@ -169,7 +187,6 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
     }
 
     private fun createBubbleView(params: WindowManager.LayoutParams): View {
-        val touchSlop = ViewConfiguration.get(this).scaledTouchSlop
         return BubbleTextView(this).apply {
             text = getString(R.string.bubble_label)
             textSize = 14f
@@ -178,47 +195,10 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             background = getDrawable(R.drawable.floating_bubble_bg)
             elevation = 18f
             onPerformClick = { enterDrawingMode() }
-
-            var startX = 0
-            var startY = 0
-            var downRawX = 0f
-            var downRawY = 0f
-            var dragging = false
-
-            setOnTouchListener { view, event ->
-                when (event.actionMasked) {
-                    MotionEvent.ACTION_DOWN -> {
-                        startX = params.x
-                        startY = params.y
-                        downRawX = event.rawX
-                        downRawY = event.rawY
-                        dragging = false
-                        true
-                    }
-
-                    MotionEvent.ACTION_MOVE -> {
-                        val dx = (event.rawX - downRawX).roundToInt()
-                        val dy = (event.rawY - downRawY).roundToInt()
-                        if (!dragging && (abs(dx) > touchSlop || abs(dy) > touchSlop)) {
-                            dragging = true
-                        }
-                        if (dragging) {
-                            params.x = startX + dx
-                            params.y = startY + dy
-                            windowManager.updateViewLayout(view, params)
-                        }
-                        true
-                    }
-
-                    MotionEvent.ACTION_UP -> {
-                        if (!dragging) {
-                            view.performClick()
-                        }
-                        true
-                    }
-
-                    else -> false
-                }
+        }.also { bubble ->
+            attachDragTouchListener(bubble, bubble, params) { x, y ->
+                bubblePositionX = x
+                bubblePositionY = y
             }
         }
     }
@@ -248,9 +228,9 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT,
         ).apply {
-            gravity = Gravity.TOP or Gravity.END
-            x = dp(16)
-            y = dp(40)
+            gravity = Gravity.TOP or Gravity.START
+            x = palettePositionX ?: defaultPaletteX()
+            y = palettePositionY ?: dp(40)
         }
     }
 
@@ -275,9 +255,15 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             createIntent(this, ACTION_OPEN_DRAWING),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
-        val stopIntent = PendingIntent.getService(
+        val clearIntent = PendingIntent.getService(
             this,
             3,
+            createIntent(this, ACTION_CLEAR),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        val stopIntent = PendingIntent.getService(
+            this,
+            4,
             createIntent(this, ACTION_STOP),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
@@ -288,8 +274,63 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             .setOngoing(true)
             .setContentIntent(contentIntent)
             .addAction(0, getString(R.string.notification_action_resume), resumeIntent)
+            .addAction(0, getString(R.string.notification_action_clear), clearIntent)
             .addAction(0, getString(R.string.notification_action_stop), stopIntent)
             .build()
+    }
+
+    private fun attachDragTouchListener(
+        touchTarget: View,
+        windowView: View,
+        params: WindowManager.LayoutParams,
+        onPositionChanged: (x: Int, y: Int) -> Unit = { _, _ -> },
+    ) {
+        val touchSlop = ViewConfiguration.get(this).scaledTouchSlop
+        touchTarget.setOnTouchListener(object : View.OnTouchListener {
+            private var startX = 0
+            private var startY = 0
+            private var downRawX = 0f
+            private var downRawY = 0f
+            private var dragging = false
+
+            override fun onTouch(view: View, event: MotionEvent): Boolean {
+                when (event.actionMasked) {
+                    MotionEvent.ACTION_DOWN -> {
+                        startX = params.x
+                        startY = params.y
+                        downRawX = event.rawX
+                        downRawY = event.rawY
+                        dragging = false
+                        return true
+                    }
+
+                    MotionEvent.ACTION_MOVE -> {
+                        val dx = (event.rawX - downRawX).roundToInt()
+                        val dy = (event.rawY - downRawY).roundToInt()
+                        if (!dragging && (abs(dx) > touchSlop || abs(dy) > touchSlop)) {
+                            dragging = true
+                        }
+                        if (dragging) {
+                            params.x = startX + dx
+                            params.y = startY + dy
+                            windowManager.updateViewLayout(windowView, params)
+                            onPositionChanged(params.x, params.y)
+                        }
+                        return true
+                    }
+
+                    MotionEvent.ACTION_UP -> {
+                        if (!dragging && windowView === touchTarget) {
+                            windowView.performClick()
+                        }
+                        return true
+                    }
+
+                    MotionEvent.ACTION_CANCEL -> return true
+                }
+                return false
+            }
+        })
     }
 
     private fun createNotificationChannel() {
@@ -311,9 +352,15 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
         return (value * density).roundToInt()
     }
 
+    private fun defaultPaletteX(): Int {
+        val screenWidth = resources.displayMetrics.widthPixels
+        return (screenWidth - dp(336)).coerceAtLeast(dp(16))
+    }
+
     companion object {
         const val ACTION_START = "dev.overlaypen.app.action.START"
         const val ACTION_OPEN_DRAWING = "dev.overlaypen.app.action.OPEN_DRAWING"
+        const val ACTION_CLEAR = "dev.overlaypen.app.action.CLEAR"
         const val ACTION_STOP = "dev.overlaypen.app.action.STOP"
 
         private const val CHANNEL_ID = "overlay_pen_session"

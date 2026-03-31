@@ -1,7 +1,6 @@
 package dev.overlaypen.app
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
@@ -216,8 +215,10 @@ private fun SpecificationCard() {
             SpecLine("Floating bubble opens drawing mode over any app.")
             SpecLine("Drawing mode blocks the underlying app to avoid accidental taps.")
             SpecLine("Passive mode keeps strokes visible with window alpha fixed at 0.78.")
+            SpecLine("The tool panel can be dragged away from the drawing area.")
+            SpecLine("Clear removes all strokes without ending the session.")
             SpecLine("Leaving the service removes every stroke from memory.")
-            SpecLine("Tools include pen, eraser, undo, width, opacity, color, and pen type.")
+            SpecLine("Tools include pen, eraser, undo, clear, width, opacity, color, and pen type.")
         }
     }
 }
@@ -226,7 +227,7 @@ private fun SpecificationCard() {
 private fun SpecLine(text: String) {
     Row(verticalAlignment = Alignment.Top) {
         Text(
-            text = "•",
+            text = "*",
             color = Color(0xFFF0B429),
             modifier = Modifier.padding(end = 8.dp),
         )

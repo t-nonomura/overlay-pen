@@ -40,4 +40,24 @@ class DrawingSessionStoreTest {
         assertEquals(ToolMode.PEN, session.currentBrush().toolMode)
         assertEquals(0xFF005F73.toInt(), session.currentBrush().color)
     }
+
+    @Test
+    fun clearRemovesEveryStroke() {
+        val session = DrawingSessionStore()
+        val brush = session.currentBrush()
+
+        session.commitStroke(
+            points = listOf(NormalizedPoint(0.2f, 0.3f)),
+            brushSnapshot = brush,
+        )
+        session.commitStroke(
+            points = listOf(NormalizedPoint(0.4f, 0.6f)),
+            brushSnapshot = brush,
+        )
+
+        session.clear()
+
+        assertFalse(session.hasStrokes())
+        assertEquals(0, session.strokeSnapshot().size)
+    }
 }

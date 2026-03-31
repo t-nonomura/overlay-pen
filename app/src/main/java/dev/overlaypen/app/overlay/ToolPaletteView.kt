@@ -25,6 +25,7 @@ class ToolPaletteView(
     private val callbacks: Callbacks,
 ) : LinearLayout(context) {
     interface Callbacks {
+        fun onClearAnnotations()
         fun onKeepAnnotations()
         fun onStopOverlay()
     }
@@ -39,8 +40,10 @@ class ToolPaletteView(
     private val eraserButton = paletteButton("Eraser") { session.updateTool(ToolMode.ERASER) }
     private val undoButton = paletteButton("Undo") { session.undo() }
     private val typeButton = paletteButton("Type") { session.cyclePenType() }
+    private val clearButton = paletteButton("Clear") { callbacks.onClearAnnotations() }
     private val keepButton = paletteButton("Keep") { callbacks.onKeepAnnotations() }
     private val closeButton = paletteButton("Close") { callbacks.onStopOverlay() }
+    private val dragHandle = paletteHandle("Move")
     private val widthValue = paletteLabel("")
     private val opacityValue = paletteLabel("")
     private val widthSeekBar = SeekBar(context)
@@ -63,11 +66,13 @@ class ToolPaletteView(
         setPadding(dp(16), dp(16), dp(16), dp(16))
         layoutParams = LayoutParams(dp(320), LayoutParams.WRAP_CONTENT)
 
-        addView(paletteLabel("Overlay Pen", 18f, true))
+        addView(headerRow())
         addView(spacer(10))
         addView(buttonRow(penButton, eraserButton, undoButton))
         addView(spacer(8))
-        addView(buttonRow(typeButton, keepButton, closeButton))
+        addView(buttonRow(typeButton, clearButton, keepButton))
+        addView(spacer(8))
+        addView(buttonRow(closeButton))
         addView(spacer(12))
         addView(colorRow())
         addView(spacer(12))
@@ -82,6 +87,8 @@ class ToolPaletteView(
         session.addListener(sessionListener)
         refreshFromSession()
     }
+
+    fun dragHandleView(): View = dragHandle
 
     override fun onDetachedFromWindow() {
         session.removeListener(sessionListener)
@@ -154,6 +161,17 @@ class ToolPaletteView(
         }
     }
 
+    private fun headerRow(): View {
+        return LinearLayout(context).apply {
+            orientation = HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            addView(paletteLabel("Overlay Pen", 18f, true).apply {
+                layoutParams = LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f)
+            })
+            addView(dragHandle)
+        }
+    }
+
     private fun buttonRow(vararg buttons: Button): View {
         return LinearLayout(context).apply {
             orientation = HORIZONTAL
@@ -178,6 +196,21 @@ class ToolPaletteView(
             minimumHeight = dp(40)
             backgroundTintList = ColorStateList.valueOf(inactiveButtonTint)
             setOnClickListener { onClick() }
+        }
+    }
+
+    private fun paletteHandle(label: String): TextView {
+        return TextView(context).apply {
+            text = label
+            setTextColor(panelLabelColor)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+            setPadding(dp(12), dp(8), dp(12), dp(8))
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = dp(18).toFloat()
+                setColor("#335B7083".toColorInt())
+                setStroke(dp(1), "#66FFFFFF".toColorInt())
+            }
         }
     }
 
