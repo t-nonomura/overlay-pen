@@ -55,6 +55,7 @@
 - ペン種別切り替え
 - Keep と Close
 - Move ハンドルによる再配置
+- ストロークがないときは `Undo`、`Clear`、`Keep` を無効化
 
 ## Overlay States
 
@@ -76,6 +77,7 @@
 - 一部アプリでは overlay 非表示の可能性がある
 - Passive Annotation では描画自体も 78 パーセント相当の見え方になる
 - bubble とパネル位置はセッション内保持のみで、アプリ再起動をまたいでは保持しない
+- 画面端吸着は左右のみで、上下方向は安全マージン付きの clamp に留める
 
 ## Next Technical Steps
 

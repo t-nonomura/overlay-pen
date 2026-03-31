@@ -235,12 +235,19 @@ class ToolPaletteView(
 
     private fun refreshFromSession() {
         val brush = session.currentBrush()
+        val hasStrokes = session.hasStrokes()
         penButton.backgroundTintList = ColorStateList.valueOf(
             if (brush.toolMode == ToolMode.PEN) activeButtonTint else inactiveButtonTint,
         )
         eraserButton.backgroundTintList = ColorStateList.valueOf(
             if (brush.toolMode == ToolMode.ERASER) activeButtonTint else inactiveButtonTint,
         )
+        undoButton.isEnabled = hasStrokes
+        clearButton.isEnabled = hasStrokes
+        keepButton.isEnabled = hasStrokes
+        undoButton.alpha = if (hasStrokes) 1f else 0.55f
+        clearButton.alpha = if (hasStrokes) 1f else 0.55f
+        keepButton.alpha = if (hasStrokes) 1f else 0.55f
         typeButton.text = context.getString(R.string.tool_type_format, brush.penType.label())
         widthValue.text = context.getString(R.string.tool_width_format, brush.strokeWidthDp.toInt())
         opacityValue.text = context.getString(R.string.tool_opacity_format, (brush.opacity * 100).toInt())

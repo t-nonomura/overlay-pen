@@ -37,6 +37,12 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
     private var palettePositionX: Int? = null
     private var palettePositionY: Int? = null
 
+    private val horizontalMarginPx: Int
+        get() = dp(16)
+
+    private val verticalMarginPx: Int
+        get() = dp(24)
+
     override fun onCreate() {
         super.onCreate()
         windowManager = getSystemService(WindowManager::class.java)
@@ -106,7 +112,14 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             toolPaletteView = ToolPaletteView(this, session, this)
             val paletteParams = createPaletteParams()
             windowManager.addView(toolPaletteView, paletteParams)
-            attachDragTouchListener(toolPaletteView!!.dragHandleView(), toolPaletteView!!, paletteParams) { x, y ->
+            attachDragTouchListener(
+                touchTarget = toolPaletteView!!.dragHandleView(),
+                windowView = toolPaletteView!!,
+                params = paletteParams,
+                fallbackWidthPx = dp(320),
+                fallbackHeightPx = dp(360),
+                snapToHorizontalEdge = true,
+            ) { x, y ->
                 palettePositionX = x
                 palettePositionY = y
             }
@@ -196,7 +209,14 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             elevation = 18f
             onPerformClick = { enterDrawingMode() }
         }.also { bubble ->
-            attachDragTouchListener(bubble, bubble, params) { x, y ->
+            attachDragTouchListener(
+                touchTarget = bubble,
+                windowView = bubble,
+                params = params,
+                fallbackWidthPx = dp(108),
+                fallbackHeightPx = dp(56),
+                snapToHorizontalEdge = true,
+            ) { x, y ->
                 bubblePositionX = x
                 bubblePositionY = y
             }
@@ -230,7 +250,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
         ).apply {
             gravity = Gravity.TOP or Gravity.START
             x = palettePositionX ?: defaultPaletteX()
-            y = palettePositionY ?: dp(40)
+            y = palettePositionY ?: verticalMarginPx
         }
     }
 
@@ -283,6 +303,9 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
         touchTarget: View,
         windowView: View,
         params: WindowManager.LayoutParams,
+        fallbackWidthPx: Int,
+        fallbackHeightPx: Int,
+        snapToHorizontalEdge: Boolean,
         onPositionChanged: (x: Int, y: Int) -> Unit = { _, _ -> },
     ) {
         val touchSlop = ViewConfiguration.get(this).scaledTouchSlop
@@ -311,8 +334,18 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
                             dragging = true
                         }
                         if (dragging) {
-                            params.x = startX + dx
-                            params.y = startY + dy
+                            val coordinates = OverlayPositioning.clamp(
+                                requestedX = startX + dx,
+                                requestedY = startY + dy,
+                                screenWidth = screenWidthPx(),
+                                screenHeight = screenHeightPx(),
+                                overlayWidth = currentOverlayWidth(windowView, fallbackWidthPx),
+                                overlayHeight = currentOverlayHeight(windowView, fallbackHeightPx),
+                                horizontalMargin = horizontalMarginPx,
+                                verticalMargin = verticalMarginPx,
+                            )
+                            params.x = coordinates.x
+                            params.y = coordinates.y
                             windowManager.updateViewLayout(windowView, params)
                             onPositionChanged(params.x, params.y)
                         }
@@ -320,7 +353,28 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
                     }
 
                     MotionEvent.ACTION_UP -> {
-                        if (!dragging && windowView === touchTarget) {
+                        if (dragging && snapToHorizontalEdge) {
+                            val snappedX = OverlayPositioning.snapToHorizontalEdge(
+                                currentX = params.x,
+                                screenWidth = screenWidthPx(),
+                                overlayWidth = currentOverlayWidth(windowView, fallbackWidthPx),
+                                horizontalMargin = horizontalMarginPx,
+                            )
+                            val coordinates = OverlayPositioning.clamp(
+                                requestedX = snappedX,
+                                requestedY = params.y,
+                                screenWidth = screenWidthPx(),
+                                screenHeight = screenHeightPx(),
+                                overlayWidth = currentOverlayWidth(windowView, fallbackWidthPx),
+                                overlayHeight = currentOverlayHeight(windowView, fallbackHeightPx),
+                                horizontalMargin = horizontalMarginPx,
+                                verticalMargin = verticalMarginPx,
+                            )
+                            params.x = coordinates.x
+                            params.y = coordinates.y
+                            windowManager.updateViewLayout(windowView, params)
+                            onPositionChanged(params.x, params.y)
+                        } else if (!dragging && windowView === touchTarget) {
                             windowView.performClick()
                         }
                         return true
@@ -353,8 +407,23 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
     }
 
     private fun defaultPaletteX(): Int {
-        val screenWidth = resources.displayMetrics.widthPixels
-        return (screenWidth - dp(336)).coerceAtLeast(dp(16))
+        return OverlayPositioning.defaultRightDock(
+            screenWidth = screenWidthPx(),
+            overlayWidth = dp(320),
+            horizontalMargin = horizontalMarginPx,
+        )
+    }
+
+    private fun screenWidthPx(): Int = resources.displayMetrics.widthPixels
+
+    private fun screenHeightPx(): Int = resources.displayMetrics.heightPixels
+
+    private fun currentOverlayWidth(view: View, fallbackWidthPx: Int): Int {
+        return view.width.takeIf { it > 0 } ?: fallbackWidthPx
+    }
+
+    private fun currentOverlayHeight(view: View, fallbackHeightPx: Int): Int {
+        return view.height.takeIf { it > 0 } ?: fallbackHeightPx
     }
 
     companion object {

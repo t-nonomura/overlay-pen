@@ -1,0 +1,47 @@
+package dev.overlaypen.app.overlay
+
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class OverlayPositioningTest {
+    @Test
+    fun clampKeepsOverlayInsideScreenBounds() {
+        val coordinates = OverlayPositioning.clamp(
+            requestedX = 1200,
+            requestedY = -20,
+            screenWidth = 1080,
+            screenHeight = 2400,
+            overlayWidth = 200,
+            overlayHeight = 300,
+            horizontalMargin = 16,
+            verticalMargin = 24,
+        )
+
+        assertEquals(864, coordinates.x)
+        assertEquals(24, coordinates.y)
+    }
+
+    @Test
+    fun snapToHorizontalEdgeChoosesLeftDockWhenCloserToLeft() {
+        val snappedX = OverlayPositioning.snapToHorizontalEdge(
+            currentX = 90,
+            screenWidth = 1080,
+            overlayWidth = 140,
+            horizontalMargin = 16,
+        )
+
+        assertEquals(16, snappedX)
+    }
+
+    @Test
+    fun snapToHorizontalEdgeChoosesRightDockWhenCloserToRight() {
+        val snappedX = OverlayPositioning.snapToHorizontalEdge(
+            currentX = 700,
+            screenWidth = 1080,
+            overlayWidth = 140,
+            horizontalMargin = 16,
+        )
+
+        assertEquals(924, snappedX)
+    }
+}

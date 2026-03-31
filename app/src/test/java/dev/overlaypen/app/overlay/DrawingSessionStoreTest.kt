@@ -22,11 +22,13 @@ class DrawingSessionStoreTest {
         )
 
         assertTrue(session.hasStrokes())
+        assertEquals(1, session.strokeCount())
         assertEquals(1, session.strokeSnapshot().size)
 
         session.undo()
 
         assertFalse(session.hasStrokes())
+        assertEquals(0, session.strokeCount())
         assertEquals(0, session.strokeSnapshot().size)
     }
 
@@ -58,6 +60,7 @@ class DrawingSessionStoreTest {
         session.clear()
 
         assertFalse(session.hasStrokes())
+        assertEquals(0, session.strokeCount())
         assertEquals(0, session.strokeSnapshot().size)
     }
 }

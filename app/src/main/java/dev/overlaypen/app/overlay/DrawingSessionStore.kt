@@ -22,6 +22,8 @@ class DrawingSessionStore {
 
     fun strokeSnapshot(): List<Stroke> = strokes.toList()
 
+    fun strokeCount(): Int = strokes.size
+
     fun hasStrokes(): Boolean = strokes.isNotEmpty()
 
     fun updateTool(mode: ToolMode) {
