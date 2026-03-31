@@ -1,6 +1,7 @@
 package dev.overlaypen.app.overlay
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
 import android.content.Context
 import android.graphics.BlendMode
 import android.graphics.Canvas
@@ -26,14 +27,19 @@ class OverlayCanvasView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
 ) : View(context, attrs) {
     private val changeListener: () -> Unit = { postInvalidateOnAnimation() }
+    private val bitmapPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
         strokeJoin = Paint.Join.ROUND
     }
+    private val reusablePath = Path()
 
     private var inProgressPoints = mutableListOf<NormalizedPoint>()
     private var inProgressBrush = session.currentBrush()
+    private var committedBitmap: Bitmap? = null
+    private var committedCanvas: Canvas? = null
+    private var committedStrokeCount = 0
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
@@ -42,17 +48,30 @@ class OverlayCanvasView @JvmOverloads constructor(
 
     override fun onDetachedFromWindow() {
         session.removeListener(changeListener)
+        recycleCommittedBitmap()
         super.onDetachedFromWindow()
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        syncCommittedBitmap()
         val checkpoint = canvas.saveLayer(0f, 0f, width.toFloat(), height.toFloat(), null)
-        session.strokeSnapshot().forEach { drawStroke(canvas, it) }
+        committedBitmap?.let { bitmap ->
+            canvas.drawBitmap(bitmap, 0f, 0f, bitmapPaint)
+        }
         if (acceptsInput && inProgressPoints.isNotEmpty()) {
             drawStroke(canvas, inProgressPoints, inProgressBrush)
         }
         canvas.restoreToCount(checkpoint)
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        if (w == oldw && h == oldh) {
+            return
+        }
+        recycleCommittedBitmap()
+        committedStrokeCount = 0
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -138,14 +157,14 @@ class OverlayCanvasView @JvmOverloads constructor(
     }
 
     private fun buildPath(points: List<NormalizedPoint>): Path {
-        val path = Path()
+        reusablePath.reset()
         points.firstOrNull()?.let { first ->
-            path.moveTo(first.x * width, first.y * height)
+            reusablePath.moveTo(first.x * width, first.y * height)
             points.drop(1).forEach { point ->
-                path.lineTo(point.x * width, point.y * height)
+                reusablePath.lineTo(point.x * width, point.y * height)
             }
         }
-        return path
+        return reusablePath
     }
 
     private fun configurePaint(stroke: Stroke) {
@@ -183,5 +202,55 @@ class OverlayCanvasView @JvmOverloads constructor(
             this,
             context.resources.displayMetrics,
         )
+    }
+
+    private fun syncCommittedBitmap() {
+        if (width <= 0 || height <= 0) {
+            return
+        }
+        ensureCommittedBitmap()
+
+        val strokes = session.strokeSnapshot()
+        if (strokes.isEmpty()) {
+            if (committedStrokeCount != 0) {
+                clearCommittedBitmap()
+                committedStrokeCount = 0
+            }
+            return
+        }
+
+        if (strokes.size < committedStrokeCount) {
+            clearCommittedBitmap()
+            committedStrokeCount = 0
+        }
+
+        if (strokes.size > committedStrokeCount) {
+            val targetCanvas = committedCanvas ?: return
+            for (index in committedStrokeCount until strokes.size) {
+                drawStroke(targetCanvas, strokes[index])
+            }
+            committedStrokeCount = strokes.size
+        }
+    }
+
+    private fun ensureCommittedBitmap() {
+        val bitmap = committedBitmap
+        if (bitmap != null && bitmap.width == width && bitmap.height == height) {
+            return
+        }
+        recycleCommittedBitmap()
+        committedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        committedCanvas = Canvas(committedBitmap!!)
+        committedStrokeCount = 0
+    }
+
+    private fun clearCommittedBitmap() {
+        committedBitmap?.eraseColor(Color.TRANSPARENT)
+    }
+
+    private fun recycleCommittedBitmap() {
+        committedBitmap?.recycle()
+        committedBitmap = null
+        committedCanvas = null
     }
 }
