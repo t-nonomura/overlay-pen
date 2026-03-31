@@ -5,6 +5,7 @@
     <string name="overlay_started">Overlay session started.</string>
     <string name="overlay_stopped">Overlay session stopped.</string>
     <string name="bubble_label">Draw</string>
+    <string name="palette_chip_label">Tools</string>
     <string name="notification_channel_name">Overlay session</string>
     <string name="notification_title">Overlay Pen is active</string>
     <string name="notification_body">Tap Resume to draw or Stop to clear every stroke.</string>

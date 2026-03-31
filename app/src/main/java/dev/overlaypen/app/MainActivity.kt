@@ -216,6 +216,7 @@ private fun SpecificationCard() {
             SpecLine("Drawing mode blocks the underlying app to avoid accidental taps.")
             SpecLine("Passive mode keeps strokes visible with window alpha fixed at 0.78.")
             SpecLine("The tool panel can be dragged away from the drawing area.")
+            SpecLine("The full tool panel can collapse into a compact Tools chip.")
             SpecLine("Clear removes all strokes without ending the session.")
             SpecLine("Leaving the service removes every stroke from memory.")
             SpecLine("Tools include pen, eraser, undo, clear, width, opacity, color, and pen type.")

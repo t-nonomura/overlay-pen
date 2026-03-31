@@ -32,10 +32,12 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
     private var passiveCanvasView: OverlayCanvasView? = null
     private var drawingCanvasView: OverlayCanvasView? = null
     private var toolPaletteView: ToolPaletteView? = null
+    private var paletteChipView: View? = null
     private var bubblePositionX: Int? = null
     private var bubblePositionY: Int? = null
     private var palettePositionX: Int? = null
     private var palettePositionY: Int? = null
+    private var paletteCollapsed = false
 
     private val horizontalMarginPx: Int
         get() = dp(16)
@@ -75,6 +77,11 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
         clearAnnotations()
     }
 
+    override fun onCollapsePalette() {
+        paletteCollapsed = true
+        showPaletteOverlay()
+    }
+
     override fun onKeepAnnotations() {
         keepAnnotations()
     }
@@ -108,22 +115,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             drawingCanvasView = OverlayCanvasView(this, session, acceptsInput = true)
             windowManager.addView(drawingCanvasView, createFullscreenParams(flags = interactiveFlags()))
         }
-        if (toolPaletteView == null) {
-            toolPaletteView = ToolPaletteView(this, session, this)
-            val paletteParams = createPaletteParams()
-            windowManager.addView(toolPaletteView, paletteParams)
-            attachDragTouchListener(
-                touchTarget = toolPaletteView!!.dragHandleView(),
-                windowView = toolPaletteView!!,
-                params = paletteParams,
-                fallbackWidthPx = dp(320),
-                fallbackHeightPx = dp(360),
-                snapToHorizontalEdge = true,
-            ) { x, y ->
-                palettePositionX = x
-                palettePositionY = y
-            }
-        }
+        showPaletteOverlay()
     }
 
     private fun keepAnnotations() {
@@ -191,6 +183,8 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
         drawingCanvasView = null
         toolPaletteView?.let { windowManager.removeView(it) }
         toolPaletteView = null
+        paletteChipView?.let { windowManager.removeView(it) }
+        paletteChipView = null
     }
 
     private fun removeAllWindows() {
@@ -254,6 +248,20 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
         }
     }
 
+    private fun createPaletteChipParams(): WindowManager.LayoutParams {
+        return WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            PixelFormat.TRANSLUCENT,
+        ).apply {
+            gravity = Gravity.TOP or Gravity.START
+            x = palettePositionX ?: defaultPaletteX()
+            y = palettePositionY ?: verticalMarginPx
+        }
+    }
+
     private fun interactiveFlags(): Int {
         return WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
     }
@@ -297,6 +305,82 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             .addAction(0, getString(R.string.notification_action_clear), clearIntent)
             .addAction(0, getString(R.string.notification_action_stop), stopIntent)
             .build()
+    }
+
+    private fun showPaletteOverlay() {
+        if (paletteCollapsed) {
+            showCollapsedPaletteChip()
+        } else {
+            showExpandedPalette()
+        }
+    }
+
+    private fun showExpandedPalette() {
+        removePaletteChip()
+        if (toolPaletteView != null) {
+            return
+        }
+        toolPaletteView = ToolPaletteView(this, session, this)
+        val paletteParams = createPaletteParams()
+        windowManager.addView(toolPaletteView, paletteParams)
+        attachDragTouchListener(
+            touchTarget = toolPaletteView!!.dragHandleView(),
+            windowView = toolPaletteView!!,
+            params = paletteParams,
+            fallbackWidthPx = dp(320),
+            fallbackHeightPx = dp(360),
+            snapToHorizontalEdge = true,
+        ) { x, y ->
+            palettePositionX = x
+            palettePositionY = y
+        }
+    }
+
+    private fun showCollapsedPaletteChip() {
+        removeExpandedPalette()
+        if (paletteChipView != null) {
+            return
+        }
+        val chipParams = createPaletteChipParams()
+        paletteChipView = createPaletteChipView(chipParams)
+        windowManager.addView(paletteChipView, chipParams)
+    }
+
+    private fun removeExpandedPalette() {
+        toolPaletteView?.let { windowManager.removeView(it) }
+        toolPaletteView = null
+    }
+
+    private fun removePaletteChip() {
+        paletteChipView?.let { windowManager.removeView(it) }
+        paletteChipView = null
+    }
+
+    private fun createPaletteChipView(params: WindowManager.LayoutParams): View {
+        return BubbleTextView(this).apply {
+            text = getString(R.string.palette_chip_label)
+            textSize = 13f
+            setTextColor(0xFFFFFFFF.toInt())
+            setPadding(dp(16), dp(12), dp(16), dp(12))
+            background = getDrawable(R.drawable.overlay_chip_bg)
+            elevation = 16f
+            onPerformClick = {
+                paletteCollapsed = false
+                showPaletteOverlay()
+            }
+        }.also { chip ->
+            attachDragTouchListener(
+                touchTarget = chip,
+                windowView = chip,
+                params = params,
+                fallbackWidthPx = dp(90),
+                fallbackHeightPx = dp(48),
+                snapToHorizontalEdge = true,
+            ) { x, y ->
+                palettePositionX = x
+                palettePositionY = y
+            }
+        }
     }
 
     private fun attachDragTouchListener(

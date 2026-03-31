@@ -26,6 +26,7 @@ class ToolPaletteView(
 ) : LinearLayout(context) {
     interface Callbacks {
         fun onClearAnnotations()
+        fun onCollapsePalette()
         fun onKeepAnnotations()
         fun onStopOverlay()
     }
@@ -44,6 +45,7 @@ class ToolPaletteView(
     private val keepButton = paletteButton("Keep") { callbacks.onKeepAnnotations() }
     private val closeButton = paletteButton("Close") { callbacks.onStopOverlay() }
     private val dragHandle = paletteHandle("Move")
+    private val collapseHandle = paletteHandle("Hide") { callbacks.onCollapsePalette() }
     private val widthValue = paletteLabel("")
     private val opacityValue = paletteLabel("")
     private val widthSeekBar = SeekBar(context)
@@ -169,6 +171,10 @@ class ToolPaletteView(
                 layoutParams = LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f)
             })
             addView(dragHandle)
+            addView(View(context).apply {
+                layoutParams = LayoutParams(dp(8), 1)
+            })
+            addView(collapseHandle)
         }
     }
 
@@ -199,7 +205,7 @@ class ToolPaletteView(
         }
     }
 
-    private fun paletteHandle(label: String): TextView {
+    private fun paletteHandle(label: String, onClick: (() -> Unit)? = null): TextView {
         return TextView(context).apply {
             text = label
             setTextColor(panelLabelColor)
@@ -210,6 +216,9 @@ class ToolPaletteView(
                 cornerRadius = dp(18).toFloat()
                 setColor("#335B7083".toColorInt())
                 setStroke(dp(1), "#66FFFFFF".toColorInt())
+            }
+            onClick?.let { click ->
+                setOnClickListener { click() }
             }
         }
     }

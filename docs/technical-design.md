@@ -56,6 +56,7 @@
 - Keep と Close
 - Move ハンドルによる再配置
 - ストロークがないときは `Undo`、`Clear`、`Keep` を無効化
+- 描画中はフルパネルを compact な `Tools` チップへ折りたためる
 
 ## Overlay States
 
