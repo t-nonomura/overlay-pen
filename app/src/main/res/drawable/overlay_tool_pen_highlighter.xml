@@ -9,8 +9,8 @@
         android:pathData="M4.2,15.8h12.6v3.4H4.2z" />
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M14.8,4.1l5.1,5.1l-2.1,2.1l-5.1,-5.1z" />
+        android:pathData="M14.2,4.2l5.7,5.7l-1.9,1.9l-5.7,-5.7z" />
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M16.9,2.2l0.8,-0.8c0.4,-0.4 1,-0.4 1.4,0l2.4,2.4c0.4,0.4 0.4,1 0,1.4l-0.8,0.8z" />
+        android:pathData="M12.8,11.7l2.7,2.7l-2.7,0.6z" />
 </vector>
