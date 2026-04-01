@@ -51,7 +51,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
         get() = dp(24)
 
     private val paletteBottomPeekPx: Int
-        get() = dp(44)
+        get() = dp(32)
 
     override fun onCreate() {
         super.onCreate()
@@ -355,6 +355,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             fallbackHeightPx = dp(360),
             snapToHorizontalEdge = true,
             bottomVisibleHeightPx = paletteBottomPeekPx,
+            bottomMarginPx = 0,
         ) { x, y ->
             palettePositionX = x
             palettePositionY = y
@@ -466,6 +467,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
         fallbackHeightPx: Int,
         snapToHorizontalEdge: Boolean,
         bottomVisibleHeightPx: Int = fallbackHeightPx,
+        bottomMarginPx: Int = verticalMarginPx,
         onPositionChanged: (x: Int, y: Int) -> Unit = { _, _ -> },
     ) {
         val touchSlop = ViewConfiguration.get(this).scaledTouchSlop
@@ -504,6 +506,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
                                 horizontalMargin = horizontalMarginPx,
                                 verticalMargin = verticalMarginPx,
                                 bottomVisibleHeight = bottomVisibleHeightPx,
+                                bottomMargin = bottomMarginPx,
                             )
                             params.x = coordinates.x
                             params.y = coordinates.y
@@ -531,6 +534,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
                                 horizontalMargin = horizontalMarginPx,
                                 verticalMargin = verticalMarginPx,
                                 bottomVisibleHeight = bottomVisibleHeightPx,
+                                bottomMargin = bottomMarginPx,
                             )
                             params.x = coordinates.x
                             params.y = coordinates.y

@@ -33,7 +33,7 @@ data class NormalizedPoint(
 
 data class BrushState(
     val toolMode: ToolMode = ToolMode.PEN,
-    val color: Int = 0xFFE4572E.toInt(),
+    val color: Int = 0xFF111827.toInt(),
     val strokeWidthDp: Float = 8f,
     val opacity: Float = 1f,
     val penType: PenType = PenType.SOLID,

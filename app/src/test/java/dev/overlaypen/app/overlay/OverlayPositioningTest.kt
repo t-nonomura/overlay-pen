@@ -33,10 +33,11 @@ class OverlayPositioningTest {
             horizontalMargin = 16,
             verticalMargin = 24,
             bottomVisibleHeight = 84,
+            bottomMargin = 0,
         )
 
         assertEquals(120, coordinates.x)
-        assertEquals(2292, coordinates.y)
+        assertEquals(2316, coordinates.y)
     }
 
     @Test
