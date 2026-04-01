@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>プライバシーポリシー | 最前面ペン</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4efe5;
+      --panel: rgba(255, 255, 255, 0.92);
+      --text: #17212b;
+      --muted: #536171;
+      --line: #d9e2ec;
+      --accent: #0b7285;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", "Hiragino Sans", "Yu Gothic UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(245, 158, 11, 0.12), transparent 24%),
+        radial-gradient(circle at top right, rgba(11, 114, 133, 0.12), transparent 26%),
+        linear-gradient(180deg, #f7f3eb 0%, #edf2f7 100%);
+    }
+
+    main {
+      width: min(900px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 64px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .topbar a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(217, 226, 236, 0.9);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 18px 48px rgba(23, 33, 43, 0.08);
+      backdrop-filter: blur(10px);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(30px, 4vw, 44px);
+    }
+
+    .lead {
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      margin: 28px 0 10px;
+      font-size: 20px;
+    }
+
+    p, li {
+      line-height: 1.9;
+      color: var(--text);
+    }
+
+    ul {
+      margin: 10px 0 0;
+      padding-left: 20px;
+    }
+
+    .note {
+      margin-top: 28px;
+      padding: 16px 18px;
+      border-radius: 16px;
+      background: rgba(11, 114, 133, 0.08);
+      color: var(--muted);
+    }
+
+    code {
+      font-family: Consolas, "Courier New", monospace;
+      background: rgba(16, 42, 67, 0.06);
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="topbar">
+      <a href="../">← Public Pages</a>
+      <a href="./en/">English</a>
+    </div>
+    <section class="panel">
+      <h1>プライバシーポリシー</h1>
+      <p class="lead">最終更新日: 2026-04-01<br>本プライバシーポリシーは、Android アプリ「最前面ペン | 画面に描ける注釈ツール」に適用されます。</p>
+
+      <h2>1. 基本方針</h2>
+      <p>本アプリは、画面上に注釈や描画を重ねて表示する機能を提供します。本アプリは、ユーザーの個人情報をできる限り収集しない設計を基本方針としています。</p>
+
+      <h2>2. 取得する情報</h2>
+      <p>現時点の本アプリは、以下の情報を開発者のサーバーへ送信、収集、共有しません。</p>
+      <ul>
+        <li>氏名、住所、電話番号、メールアドレスなどの個人情報</li>
+        <li>アカウント情報</li>
+        <li>位置情報</li>
+        <li>連絡先</li>
+        <li>写真、動画、音声などのメディアファイル</li>
+        <li>広告 ID</li>
+        <li>解析用の利用ログ</li>
+        <li>購入情報</li>
+      </ul>
+
+      <h2>3. アプリ内で扱う情報</h2>
+      <p>本アプリは、ユーザーが画面上に描いた線、色、太さ、不透明度などの描画状態を、アプリの動作中に一時的に端末メモリ上で扱います。</p>
+      <ul>
+        <li>端末外への送信は行いません</li>
+        <li>開発者または第三者と共有しません</li>
+        <li>セッション終了時に消去されます</li>
+        <li>現時点では永続保存機能を提供していません</li>
+      </ul>
+
+      <h2>4. 利用する権限</h2>
+      <p>本アプリは、他のアプリの上に描画 UI を表示するために Android のオーバーレイ関連権限を利用します。また、描画用オーバーレイを安定して表示するためにフォアグラウンドサービスを使用します。</p>
+
+      <h2>5. 第三者提供</h2>
+      <p>本アプリは、ユーザー情報を第三者へ販売、共有、提供しません。現時点では広告 SDK、アクセス解析 SDK、外部課金 SDK、クラッシュレポート SDK も組み込んでいません。</p>
+
+      <h2>6. 子どもの利用</h2>
+      <p>本アプリは、13 歳未満の子どもを主たる対象としたサービスではありません。</p>
+
+      <h2>7. セキュリティ</h2>
+      <p>本アプリは、端末外へのデータ送信を行わない設計を採用することで、取り扱う情報を最小限にしています。今後、保存機能、共有機能、課金機能、分析機能などを追加する場合は、必要に応じて安全管理措置および本プライバシーポリシーの更新を行います。</p>
+
+      <h2>8. 将来の機能追加について</h2>
+      <p>今後、本アプリに描画の保存、画像としての書き出し、共有機能、アプリ内課金、障害解析または利用状況分析などを追加する場合があります。これらの機能追加により、取得または送信する情報の内容が変わる場合は、本プライバシーポリシーおよび Google Play の申告内容を更新します。</p>
+
+      <h2>9. 改定</h2>
+      <p>本プライバシーポリシーは、法令改正、機能追加、運用変更などに応じて改定されることがあります。重要な変更がある場合は、アプリ内表示、配布ページ、または公開ページ上で周知します。</p>
+
+      <h2>10. お問い合わせ</h2>
+      <p>本プライバシーポリシーに関するお問い合わせは、以下の連絡先までお願いします。</p>
+      <ul>
+        <li>開発者名: t-nonomura</li>
+        <li>連絡先メールアドレス: <code>&lt;公開用メールアドレスを記載&gt;</code></li>
+        <li>公開 URL: <code>&lt;Privacy Policy を公開した URL を記載&gt;</code></li>
+      </ul>
+
+      <div class="note">公開前に、連絡先メールアドレスと実際の公開 URL を差し替えてください。</div>
+    </section>
+  </main>
+</body>
+</html>

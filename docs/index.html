@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>最前面ペン | Public Pages</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f1e8;
+      --panel: rgba(255, 255, 255, 0.88);
+      --text: #18212f;
+      --muted: #52606d;
+      --line: #d7dfe7;
+      --accent: #0b7285;
+      --accent-strong: #095c6b;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Hiragino Sans", "Yu Gothic UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(11, 114, 133, 0.12), transparent 28%),
+        linear-gradient(180deg, #f8f4eb 0%, #edf2f7 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    main {
+      width: min(840px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 48px 0 64px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(215, 223, 231, 0.9);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 18px 48px rgba(24, 33, 47, 0.08);
+      backdrop-filter: blur(10px);
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(11, 114, 133, 0.12);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    h1 {
+      margin: 16px 0 12px;
+      font-size: clamp(32px, 5vw, 52px);
+      line-height: 1.05;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 16px;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-top: 28px;
+    }
+
+    .card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      padding: 18px 18px 16px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.9);
+      transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(11, 114, 133, 0.35);
+      box-shadow: 0 10px 24px rgba(24, 33, 47, 0.08);
+    }
+
+    .card strong {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+
+    .card span {
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .meta {
+      margin-top: 18px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="panel">
+      <div class="eyebrow">Public Pages</div>
+      <h1>最前面ペン</h1>
+      <p>画面に描ける注釈ツールの公開ページです。プライバシーポリシーは以下から日本語版または英語版を確認できます。</p>
+      <div class="actions">
+        <a class="card" href="./privacy-policy/">
+          <strong>プライバシーポリシー</strong>
+          <span>日本語版の公開ページです。</span>
+        </a>
+        <a class="card" href="./privacy-policy/en/">
+          <strong>Privacy Policy</strong>
+          <span>English public page for store listing and app disclosure.</span>
+        </a>
+      </div>
+      <div class="meta">このページは GitHub Pages で公開できる静的ページとして構成されています。</div>
+    </section>
+  </main>
+</body>
+</html>
