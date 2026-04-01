@@ -10,6 +10,7 @@ import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.SeekBar
@@ -132,17 +133,21 @@ class ToolPaletteView(
         }
         paletteColors.forEach { color ->
             val swatch = View(context).apply {
-                layoutParams = LayoutParams(dp(28), dp(28)).also {
-                    it.marginEnd = dp(8)
-                }
+                layoutParams = FrameLayout.LayoutParams(dp(28), dp(28), Gravity.CENTER)
                 background = GradientDrawable().apply {
                     shape = GradientDrawable.OVAL
                     setColor(color)
                 }
+            }
+            val swatchContainer = FrameLayout(context).apply {
+                layoutParams = LayoutParams(dp(36), dp(36)).also {
+                    it.marginEnd = dp(6)
+                }
+                addView(swatch)
                 setOnClickListener { session.updateColor(color) }
             }
             colorSwatches[color] = swatch
-            container.addView(swatch)
+            container.addView(swatchContainer)
         }
         return HorizontalScrollView(context).apply {
             isHorizontalScrollBarEnabled = false
