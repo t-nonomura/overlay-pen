@@ -28,8 +28,46 @@ class DrawingSessionStoreTest {
         session.undo()
 
         assertFalse(session.hasStrokes())
+        assertTrue(session.hasRedoHistory())
         assertEquals(0, session.strokeCount())
         assertEquals(0, session.strokeSnapshot().size)
+    }
+
+    @Test
+    fun redoRestoresLastUndoneStroke() {
+        val session = DrawingSessionStore()
+        val brush = session.currentBrush()
+
+        session.commitStroke(
+            points = listOf(NormalizedPoint(0.1f, 0.2f)),
+            brushSnapshot = brush,
+        )
+
+        session.undo()
+        session.redo()
+
+        assertTrue(session.hasStrokes())
+        assertFalse(session.hasRedoHistory())
+        assertEquals(1, session.strokeCount())
+    }
+
+    @Test
+    fun committingNewStrokeClearsRedoHistory() {
+        val session = DrawingSessionStore()
+        val brush = session.currentBrush()
+
+        session.commitStroke(
+            points = listOf(NormalizedPoint(0.1f, 0.2f)),
+            brushSnapshot = brush,
+        )
+        session.undo()
+        session.commitStroke(
+            points = listOf(NormalizedPoint(0.3f, 0.4f)),
+            brushSnapshot = brush,
+        )
+
+        assertFalse(session.hasRedoHistory())
+        assertEquals(1, session.strokeCount())
     }
 
     @Test
@@ -60,6 +98,7 @@ class DrawingSessionStoreTest {
         session.clear()
 
         assertFalse(session.hasStrokes())
+        assertFalse(session.hasRedoHistory())
         assertEquals(0, session.strokeCount())
         assertEquals(0, session.strokeSnapshot().size)
     }

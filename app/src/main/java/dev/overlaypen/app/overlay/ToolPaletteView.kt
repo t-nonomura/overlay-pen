@@ -27,7 +27,6 @@ class ToolPaletteView(
     interface Callbacks {
         fun onClearAnnotations()
         fun onCollapsePalette()
-        fun onKeepAnnotations()
         fun onStopOverlay()
     }
 
@@ -40,9 +39,9 @@ class ToolPaletteView(
     private val penButton = paletteButton(context.getString(R.string.palette_pen)) { session.updateTool(ToolMode.PEN) }
     private val eraserButton = paletteButton(context.getString(R.string.palette_eraser)) { session.updateTool(ToolMode.ERASER) }
     private val undoButton = paletteButton(context.getString(R.string.palette_undo)) { session.undo() }
+    private val redoButton = paletteButton(context.getString(R.string.palette_redo)) { session.redo() }
     private val typeButton = paletteButton(context.getString(R.string.tool_type_format, "")) { session.cyclePenType() }
     private val clearButton = paletteButton(context.getString(R.string.palette_clear)) { callbacks.onClearAnnotations() }
-    private val keepButton = paletteButton(context.getString(R.string.palette_keep)) { callbacks.onKeepAnnotations() }
     private val closeButton = paletteButton(context.getString(R.string.palette_close)) { callbacks.onStopOverlay() }
     private val dragHandle = paletteHandle(context.getString(R.string.palette_move))
     private val collapseHandle = paletteHandle(context.getString(R.string.palette_hide)) { callbacks.onCollapsePalette() }
@@ -55,9 +54,8 @@ class ToolPaletteView(
     private val paletteColors = listOf(
         0xFF111827.toInt(),
         0xFFFFFFFF.toInt(),
-        0xFF0F766E.toInt(),
-        0xFF2563EB.toInt(),
         0xFFDC2626.toInt(),
+        0xFF2563EB.toInt(),
         0xFFF59E0B.toInt(),
     )
 
@@ -72,7 +70,7 @@ class ToolPaletteView(
         addView(spacer(10))
         addView(buttonRow(penButton, eraserButton, undoButton))
         addView(spacer(8))
-        addView(buttonRow(typeButton, clearButton, keepButton))
+        addView(buttonRow(redoButton, typeButton, clearButton))
         addView(spacer(8))
         addView(buttonRow(closeButton))
         addView(spacer(12))
@@ -245,6 +243,7 @@ class ToolPaletteView(
     private fun refreshFromSession() {
         val brush = session.currentBrush()
         val hasStrokes = session.hasStrokes()
+        val hasRedoHistory = session.hasRedoHistory()
         penButton.backgroundTintList = ColorStateList.valueOf(
             if (brush.toolMode == ToolMode.PEN) activeButtonTint else inactiveButtonTint,
         )
@@ -252,11 +251,11 @@ class ToolPaletteView(
             if (brush.toolMode == ToolMode.ERASER) activeButtonTint else inactiveButtonTint,
         )
         undoButton.isEnabled = hasStrokes
+        redoButton.isEnabled = hasRedoHistory
         clearButton.isEnabled = hasStrokes
-        keepButton.isEnabled = hasStrokes
         undoButton.alpha = if (hasStrokes) 1f else 0.55f
+        redoButton.alpha = if (hasRedoHistory) 1f else 0.55f
         clearButton.alpha = if (hasStrokes) 1f else 0.55f
-        keepButton.alpha = if (hasStrokes) 1f else 0.55f
         typeButton.text = context.getString(R.string.tool_type_format, context.getString(brush.penType.labelResId()))
         widthValue.text = context.getString(R.string.tool_width_format, brush.strokeWidthDp.toInt())
         opacityValue.text = context.getString(R.string.tool_opacity_format, (brush.opacity * 100).toInt())

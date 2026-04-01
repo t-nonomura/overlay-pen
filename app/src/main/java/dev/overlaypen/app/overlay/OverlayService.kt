@@ -86,10 +86,6 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
         collapseIntoPassiveToolsChip()
     }
 
-    override fun onKeepAnnotations() {
-        keepAnnotations()
-    }
-
     override fun onStopOverlay() {
         stopSelf()
     }
@@ -133,16 +129,6 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             windowManager.addView(drawingCanvasView, createFullscreenParams(flags = interactiveFlags()))
         }
         showExpandedPalette()
-    }
-
-    private fun keepAnnotations() {
-        removeDrawingViews()
-        showBubble()
-        if (session.hasStrokes()) {
-            showPassiveCanvas()
-        } else {
-            removePassiveCanvas()
-        }
     }
 
     private fun clearAnnotations() {
@@ -236,7 +222,6 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
                 createLauncherIconView(
                     sizeDp = 38,
                     iconSizeDp = 18,
-                    addIndicatorDot = true,
                 ),
             )
 
@@ -253,7 +238,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
                 params = params,
                 fallbackWidthPx = dp(126),
                 fallbackHeightPx = dp(58),
-                snapToHorizontalEdge = true,
+                snapToHorizontalEdge = false,
             ) { x, y ->
                 bubblePositionX = x
                 bubblePositionY = y
@@ -408,7 +393,6 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
                 createLauncherIconView(
                     sizeDp = 34,
                     iconSizeDp = 16,
-                    addIndicatorDot = false,
                 ),
             )
 
@@ -436,37 +420,18 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
     private fun createLauncherIconView(
         sizeDp: Int,
         iconSizeDp: Int,
-        addIndicatorDot: Boolean,
     ): View {
         return FrameLayout(this).apply {
             layoutParams = LinearLayout.LayoutParams(dp(sizeDp), dp(sizeDp))
-            background = context.getDrawable(
-                if (addIndicatorDot) {
-                    R.drawable.floating_bubble_orb_bg
-                } else {
-                    R.drawable.overlay_chip_orb_bg
-                },
-            )
+            background = context.getDrawable(R.drawable.overlay_chip_orb_bg)
 
             addView(
                 ImageView(context).apply {
                     layoutParams = FrameLayout.LayoutParams(dp(iconSizeDp), dp(iconSizeDp), Gravity.CENTER)
-                    setImageResource(android.R.drawable.ic_menu_edit)
+                    setImageResource(R.drawable.overlay_launcher_icon)
                     setColorFilter(0xFFFFFFFF.toInt(), PorterDuff.Mode.SRC_IN)
                 },
             )
-
-            if (addIndicatorDot) {
-                addView(
-                    View(context).apply {
-                        layoutParams = FrameLayout.LayoutParams(dp(10), dp(10), Gravity.END or Gravity.BOTTOM).also {
-                            it.marginEnd = dp(2)
-                            it.bottomMargin = dp(2)
-                        }
-                        background = context.getDrawable(R.drawable.floating_bubble_dot_bg)
-                    },
-                )
-            }
         }
     }
 

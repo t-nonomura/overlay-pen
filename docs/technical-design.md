@@ -50,7 +50,7 @@
 - Foreground Service として常駐
 - 通知の表示
 - フローティングボタン、描画キャンバス、ツールパレットの lifecycle 管理
-- `Keep`、`Hide`、通知からの `Resume`、`Clear`、`Stop` を処理
+- `Hide`、通知からの `Resume`、`Clear`、`Stop` を処理
 - bubble と palette / chip の位置をセッション中だけ保持する
 
 ### `DrawingSessionStore`
@@ -73,20 +73,21 @@
 - ペン
 - 消しゴム
 - アンドゥ
+- リドゥ
 - クリア
 - 太さ
 - 透明度
 - 色
 - ペン種別切り替え
-- Keep と Close
+- Close
 - Move ハンドルによる再配置
-- ストロークがないときは `Undo`、`Clear`、`Keep` を無効化
+- ストロークがないときは `Undo` と `Clear` を無効化し、redo 履歴がないときは `Redo` を無効化
 - `Hide` では interactive canvas を外し、passive overlay と compact な `Tools` チップへ切り替える
 
 ### `OverlayPositioning`
 
 - 画面内に収まるよう overlay 座標を clamp する
-- bubble と palette を左右端へ吸着させる
+- 描画パネルを左右端へ吸着させる
 - `WindowManager` 依存を分離し、単体テストしやすい形で保持する
 
 ## Overlay States
@@ -98,7 +99,7 @@
    - 下位アプリのタッチはブロック
 3. Passive Annotation
    - 描画だけを残す
-   - フローティングボタンを戻す
+   - compact な `Tools` チップを表示する
    - overlay window alpha は `0.78`
 4. Stopped
    - すべての window と描画を破棄

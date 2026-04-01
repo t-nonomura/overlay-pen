@@ -19,10 +19,9 @@
 
 - フローティングボタンによる開始
 - 全画面透明キャンバスでの描画
-- ペン、消しゴム、アンドゥ、全消し
+- ペン、消しゴム、アンドゥ、リドゥ、全消し
 - 色、太さ、透明度、ペン種類の変更
-- 無料版の基本色は黒、赤、青、黄の 4 色とする
-- `Keep` による passive annotation 維持
+- 無料版の基本色は黒、白、赤、青、黄の 5 色とする
 - `Hide` による compact `Tools` モード
 - 通知からの再開、全消し、停止
 
@@ -40,10 +39,10 @@
 
 | Requirement | Status | Notes |
 | --- | --- | --- |
-| FR-01 Overlay Launcher | Implemented | フローティングボタン表示、ドラッグ、左右端吸着あり |
+| FR-01 Overlay Launcher | Implemented | フローティングボタン表示とドラッグ移動に対応 |
 | FR-02 Enter Drawing Mode | Implemented | 全画面透明キャンバスとツールパネルを表示し、描画中は下位アプリ操作をブロック |
 | FR-03 Drawing Tools | Implemented | ペン、消しゴム、アンドゥ、全消し、太さ、色、透明度、ペン種類を提供 |
-| FR-04 Exit Drawing Mode | Implemented with constraint | `Keep` と `Hide` により passive annotation へ移行し、alpha `0.78` を固定 |
+| FR-04 Exit Drawing Mode | Implemented with constraint | `Hide` により passive annotation へ移行し、alpha `0.78` を固定 |
 | FR-05 End Overlay Session | Implemented | 停止時に window と描画メモリを破棄 |
 | FR-06 Settings and State | Partially implemented | セッション中のブラシ状態は保持。回転や OEM 差分の実機検証は未完了 |
 
@@ -61,7 +60,7 @@
 4. フローティングボタンをタップして落書きモードへ入る
 5. 画面上に描画し、消しゴムやアンドゥやペン設定を使う
 6. 落書きモードを終了する
-7. 描画は残したまま、下のアプリ操作へ戻る
+7. `Hide` 後は描画を残したまま、下のアプリ操作へ戻る
 8. オーバーレイツール自体を終了すると描画も消える
 
 ## Functional Requirements
@@ -84,6 +83,7 @@
   - ペン
   - 消しゴム
   - アンドゥ
+  - リドゥ
   - ペン太さ変更
   - ペン色変更
   - 透明度変更
@@ -224,7 +224,7 @@
 ## Premium Guardrail For Core Utility
 
 - 無料版でも「実用に足る色数」と「基本的な描き心地」は必ず提供する
-- 無料版の基本色は黒、赤、青、黄の 4 色を下限とする
+- 無料版の基本色は黒、白、赤、青、黄の 5 色を下限とする
 - premium は無料版を不便にするためではなく、表現幅や効率を広げる方向で設計する
 - 色数制限やペン種別制限を行う場合でも、無料版が体験版のように見え過ぎない線を守る
 

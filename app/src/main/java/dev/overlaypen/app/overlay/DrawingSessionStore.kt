@@ -8,6 +8,7 @@ import dev.overlaypen.app.model.ToolMode
 class DrawingSessionStore {
     private val listeners = linkedSetOf<() -> Unit>()
     private val strokes = mutableListOf<Stroke>()
+    private val redoStrokes = mutableListOf<Stroke>()
     private var brushState = BrushState()
 
     fun addListener(listener: () -> Unit) {
@@ -25,6 +26,8 @@ class DrawingSessionStore {
     fun strokeCount(): Int = strokes.size
 
     fun hasStrokes(): Boolean = strokes.isNotEmpty()
+
+    fun hasRedoHistory(): Boolean = redoStrokes.isNotEmpty()
 
     fun updateTool(mode: ToolMode) {
         brushState = brushState.copy(toolMode = mode)
@@ -58,6 +61,7 @@ class DrawingSessionStore {
         if (points.isEmpty()) {
             return
         }
+        redoStrokes.clear()
         strokes += Stroke(
             points = points,
             color = brushSnapshot.color,
@@ -73,15 +77,24 @@ class DrawingSessionStore {
         if (strokes.isEmpty()) {
             return
         }
-        strokes.removeAt(strokes.lastIndex)
+        redoStrokes += strokes.removeAt(strokes.lastIndex)
+        notifyChanged()
+    }
+
+    fun redo() {
+        if (redoStrokes.isEmpty()) {
+            return
+        }
+        strokes += redoStrokes.removeAt(redoStrokes.lastIndex)
         notifyChanged()
     }
 
     fun clear() {
-        if (strokes.isEmpty()) {
+        if (strokes.isEmpty() && redoStrokes.isEmpty()) {
             return
         }
         strokes.clear()
+        redoStrokes.clear()
         notifyChanged()
     }
 

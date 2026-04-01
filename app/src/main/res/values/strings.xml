@@ -31,15 +31,15 @@
     <string name="spec_line_5">非表示にすると、コンパクトなツールボタンに切り替わり、下のアプリを操作できます。</string>
     <string name="spec_line_6">全消しはセッションを終了せずに、描画だけを消します。</string>
     <string name="spec_line_7">セッションを終了すると、描画はメモリから完全に消えます。</string>
-    <string name="spec_line_8">ペン、消しゴム、アンドゥ、全消し、太さ、透明度、色、ペン種類を使えます。</string>
+    <string name="spec_line_8">ペン、消しゴム、アンドゥ、リドゥ、全消し、太さ、透明度、色、ペン種類を使えます。</string>
     <string name="palette_title">オーバーレイペン</string>
     <string name="palette_move">移動</string>
     <string name="palette_hide">隠す</string>
     <string name="palette_pen">ペン</string>
     <string name="palette_eraser">消しゴム</string>
     <string name="palette_undo">アンドゥ</string>
+    <string name="palette_redo">リドゥ</string>
     <string name="palette_clear">全消し</string>
-    <string name="palette_keep">保持</string>
     <string name="palette_close">終了</string>
     <string name="palette_width">太さ</string>
     <string name="palette_opacity">透明度</string>
