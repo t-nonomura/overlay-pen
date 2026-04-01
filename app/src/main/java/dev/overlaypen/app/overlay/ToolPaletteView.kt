@@ -13,6 +13,7 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.HorizontalScrollView
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.TextView
@@ -232,7 +233,7 @@ class ToolPaletteView(
         return ImageButton(context).apply {
             setImageResource(iconRes)
             contentDescription = contentDescriptionText
-            scaleType = ImageButton.ScaleType.CENTER
+            scaleType = ImageView.ScaleType.CENTER
             adjustViewBounds = true
             imageTintList = ColorStateList.valueOf(iconTint)
             background = paletteButtonBackground(inactiveButtonTint)
@@ -263,7 +264,7 @@ class ToolPaletteView(
         return ImageButton(context).apply {
             setImageResource(iconRes)
             contentDescription = contentDescriptionText
-            scaleType = ImageButton.ScaleType.CENTER
+            scaleType = ImageView.ScaleType.CENTER
             imageTintList = ColorStateList.valueOf(panelLabelColor)
             background = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
