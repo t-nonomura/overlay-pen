@@ -82,7 +82,7 @@ class ToolPaletteView(
         background = context.getDrawable(R.drawable.overlay_panel_bg)
         elevation = 16f
         setPadding(dp(16), dp(16), dp(16), dp(16))
-        layoutParams = LayoutParams(dp(320), LayoutParams.WRAP_CONTENT)
+        layoutParams = LayoutParams(dp(288), LayoutParams.WRAP_CONTENT)
 
         addView(headerRow())
         addView(spacer(10))
