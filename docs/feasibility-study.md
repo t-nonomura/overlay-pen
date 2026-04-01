@@ -11,6 +11,13 @@
 - 公開形態: まずは限定配布または内部テストを推奨
 - 仕様上の注意: 受け入れ条件に Android 制約を明記する
 
+## Current Repository Status
+
+- Kotlin / Android のプロトタイプ実装がリポジトリに存在する
+- `TYPE_APPLICATION_OVERLAY`、Foreground Service、フローティングボタン、描画キャンバス、表示専用 overlay、ツールパレット、通知操作までコード化済み
+- Passive Annotation の暫定仕様として、overlay alpha `0.78` を採用している
+- ただし、これは机上判断と実装上の初期決定であり、Android 12 から 15 の実機マトリクス検証はまだ必要
+
 ## Proposed Technical Architecture
 
 ### Main Components
@@ -44,6 +51,17 @@
    - フローティングボタンは表示維持
 4. Stopped
    - すべての overlay と描画状態を破棄
+
+## Current Prototype Decision
+
+現行コードベースでは次の仕様を採用しています。
+
+- 対応 OS は Android 12 以上
+- Passive Annotation 用 overlay window alpha は `0.78`
+- 描画データはメモリ保持のみで、停止時に全消去
+- 描画中は interactive canvas を前面表示し、下位アプリ操作をブロック
+- `Hide` では描画入力を止め、compact な `Tools` チップへ切り替える
+- bubble と palette / chip はドラッグ移動でき、画面内 clamp と左右端吸着を行う
 
 ## Requirement Feasibility Rating
 
@@ -134,6 +152,19 @@ MediaProjection を使っても、今回必要なのは画面取得ではなく 
 
 Foreground Service についても、Android Developers は manifest 宣言が Google Play Device and Network Abuse policy に適合する必要があると明記しています。公開時は FGS の用途説明、ユーザー起点性、継続可視性を整理する必要があります。
 
+### Monetization Timing
+
+無料版のみで公開する方針は、初期リリースの運用負荷と公開情報リスクを抑えるうえで妥当です。Google Play の公式ヘルプでは、個人アカウントでも monetization 自体は可能ですが、in-app purchases や paid apps を扱う場合は physical address の登録と公開表示が必要とされています。
+
+したがって、課金導入の是非は単なる機能優先順位ではなく、次の運用判断とセットで扱う必要があります。
+
+- 公開住所をどう運用するか
+- 組織アカウントへ移行するか、必要に応じて新規組織アカウントへアプリ移管するか
+- 問い合わせ窓口やサポート導線をどう保守するか
+- 有料版の売上見込みが、追加運用コストに見合うか
+
+無料版で市場需要を確認し、需要が明確になった段階で組織運用へ寄せる方針は合理的です。
+
 ### Recommended Launch Path
 
 1. 内部テスト
@@ -154,21 +185,25 @@ V1 では次を明示的に仕様へ入れることを推奨します。
 
 ### Spike 1: Passive Annotation Validation
 
+- 状態: 未完了
 - 目的: Android 12 から 15 でタッチスルー条件を確認する
 - 判定: `LayoutParams.alpha` 0.8 以下で UX が許容できるか
 
 ### Spike 2: Overlay Window Composition
 
+- 状態: 一部実装済み、検証未完了
 - 目的: フローティングボタン、キャンバス、ツールバーを分離したときの combined opacity と操作性を確認する
 - 判定: 複数 overlay の重なりで untrusted touch が増えないか
 
 ### Spike 3: Sensitive App Compatibility
 
+- 状態: 未着手
 - 目的: `HIDE_OVERLAY_WINDOWS` を使うアプリ上での挙動確認
 - 判定: 非表示時のユーザー通知や fallback を定義できるか
 
 ### Spike 4: OEM Device Matrix
 
+- 状態: 未着手
 - 対象例:
   - Pixel
   - Samsung Galaxy

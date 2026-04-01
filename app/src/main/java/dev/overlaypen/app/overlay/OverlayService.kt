@@ -100,11 +100,22 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             return
         }
         startForegroundCompat(buildNotification())
-        if (bubbleView == null) {
-            showBubble()
+        if (drawingCanvasView != null || toolPaletteView != null) {
+            return
+        }
+        if (paletteCollapsed) {
+            removeBubble()
+            showCollapsedPaletteChip()
+        } else {
+            removePaletteChip()
+            if (bubbleView == null) {
+                showBubble()
+            }
         }
         if (session.hasStrokes()) {
             showPassiveCanvas()
+        } else {
+            removePassiveCanvas()
         }
     }
 
@@ -222,44 +233,18 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             setOnClickListener { enterDrawingMode() }
 
             addView(
-                FrameLayout(context).apply {
-                    layoutParams = LinearLayout.LayoutParams(dp(38), dp(38))
-                    background = context.getDrawable(R.drawable.floating_bubble_orb_bg)
-
-                    addView(
-                        ImageView(context).apply {
-                            layoutParams = FrameLayout.LayoutParams(dp(18), dp(18), Gravity.CENTER)
-                            setImageResource(android.R.drawable.ic_menu_edit)
-                            setColorFilter(0xFFFFFFFF.toInt(), PorterDuff.Mode.SRC_IN)
-                        },
-                    )
-
-                    addView(
-                        View(context).apply {
-                            layoutParams = FrameLayout.LayoutParams(dp(10), dp(10), Gravity.END or Gravity.BOTTOM).also {
-                                it.marginEnd = dp(2)
-                                it.bottomMargin = dp(2)
-                            }
-                            background = context.getDrawable(R.drawable.floating_bubble_dot_bg)
-                        },
-                    )
-                },
+                createLauncherIconView(
+                    sizeDp = 38,
+                    iconSizeDp = 18,
+                    addIndicatorDot = true,
+                ),
             )
 
             addView(
-                TextView(context).apply {
-                    layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                    ).also {
-                        it.marginStart = dp(10)
-                    }
-                    text = getString(R.string.bubble_label)
-                    textSize = 14f
-                    letterSpacing = 0.02f
-                    setTypeface(typeface, Typeface.BOLD)
-                    setTextColor(0xFFFFFFFF.toInt())
-                },
+                createLauncherLabelView(
+                    text = getString(R.string.bubble_label),
+                    textSizeSp = 14f,
+                ),
             )
         }.also { bubble ->
             attachDragTouchListener(
@@ -420,34 +405,18 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             }
 
             addView(
-                FrameLayout(context).apply {
-                    layoutParams = LinearLayout.LayoutParams(dp(34), dp(34))
-                    background = context.getDrawable(R.drawable.overlay_chip_orb_bg)
-
-                    addView(
-                        ImageView(context).apply {
-                            layoutParams = FrameLayout.LayoutParams(dp(16), dp(16), Gravity.CENTER)
-                            setImageResource(android.R.drawable.ic_menu_manage)
-                            setColorFilter(0xFFFFFFFF.toInt(), PorterDuff.Mode.SRC_IN)
-                        },
-                    )
-                },
+                createLauncherIconView(
+                    sizeDp = 34,
+                    iconSizeDp = 16,
+                    addIndicatorDot = false,
+                ),
             )
 
             addView(
-                TextView(context).apply {
-                    layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                    ).also {
-                        it.marginStart = dp(10)
-                    }
-                    text = getString(R.string.palette_chip_label)
-                    textSize = 13f
-                    letterSpacing = 0.02f
-                    setTypeface(typeface, Typeface.BOLD)
-                    setTextColor(0xFFFFFFFF.toInt())
-                },
+                createLauncherLabelView(
+                    text = getString(R.string.bubble_label),
+                    textSizeSp = 13f,
+                ),
             )
         }.also { chip ->
             attachDragTouchListener(
@@ -456,11 +425,67 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
                 params = params,
                 fallbackWidthPx = dp(112),
                 fallbackHeightPx = dp(54),
-                snapToHorizontalEdge = true,
+                snapToHorizontalEdge = false,
             ) { x, y ->
                 palettePositionX = x
                 palettePositionY = y
             }
+        }
+    }
+
+    private fun createLauncherIconView(
+        sizeDp: Int,
+        iconSizeDp: Int,
+        addIndicatorDot: Boolean,
+    ): View {
+        return FrameLayout(this).apply {
+            layoutParams = LinearLayout.LayoutParams(dp(sizeDp), dp(sizeDp))
+            background = context.getDrawable(
+                if (addIndicatorDot) {
+                    R.drawable.floating_bubble_orb_bg
+                } else {
+                    R.drawable.overlay_chip_orb_bg
+                },
+            )
+
+            addView(
+                ImageView(context).apply {
+                    layoutParams = FrameLayout.LayoutParams(dp(iconSizeDp), dp(iconSizeDp), Gravity.CENTER)
+                    setImageResource(android.R.drawable.ic_menu_edit)
+                    setColorFilter(0xFFFFFFFF.toInt(), PorterDuff.Mode.SRC_IN)
+                },
+            )
+
+            if (addIndicatorDot) {
+                addView(
+                    View(context).apply {
+                        layoutParams = FrameLayout.LayoutParams(dp(10), dp(10), Gravity.END or Gravity.BOTTOM).also {
+                            it.marginEnd = dp(2)
+                            it.bottomMargin = dp(2)
+                        }
+                        background = context.getDrawable(R.drawable.floating_bubble_dot_bg)
+                    },
+                )
+            }
+        }
+    }
+
+    private fun createLauncherLabelView(
+        text: String,
+        textSizeSp: Float,
+    ): TextView {
+        return TextView(this).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+            ).also {
+                it.marginStart = dp(10)
+            }
+            this.text = text
+            textSize = textSizeSp
+            letterSpacing = 0.02f
+            setTypeface(typeface, Typeface.BOLD)
+            setTextColor(0xFFFFFFFF.toInt())
         }
     }
 
