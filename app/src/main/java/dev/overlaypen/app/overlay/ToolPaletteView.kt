@@ -86,9 +86,9 @@ class ToolPaletteView(
 
         addView(headerRow())
         addView(spacer(10))
-        addView(buttonRow(penButton, eraserButton, undoButton))
+        addView(buttonRow(penButton, eraserButton, typeButton))
         addView(spacer(8))
-        addView(buttonRow(redoButton, typeButton, clearButton))
+        addView(buttonRow(undoButton, redoButton, clearButton))
         addView(spacer(8))
         addView(footerRow())
         addView(spacer(12))
