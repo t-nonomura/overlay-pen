@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
-        <shape android:shape="oval">
-            <gradient
-                android:angle="45"
-                android:endColor="#EE9B00"
-                android:startColor="#0B7285" />
-        </shape>
-    </item>
-    <item android:bottom="12dp" android:left="12dp" android:right="12dp" android:top="12dp">
         <shape android:shape="rectangle">
-            <corners android:radius="16dp" />
-            <stroke
-                android:width="4dp"
-                android:color="#FFFFFFFF" />
+            <corners android:radius="24dp" />
+            <gradient
+                android:angle="315"
+                android:startColor="#132238"
+                android:centerColor="#17324D"
+                android:endColor="#0B7285" />
         </shape>
     </item>
+    <item
+        android:left="12dp"
+        android:top="12dp"
+        android:right="12dp"
+        android:bottom="12dp"
+        android:drawable="@drawable/app_icon_foreground" />
 </layer-list>
