@@ -237,7 +237,6 @@ class ToolPaletteView(
             adjustViewBounds = true
             imageTintList = ColorStateList.valueOf(iconTint)
             background = paletteButtonBackground(inactiveButtonTint)
-            minHeight = dp(44)
             minimumHeight = dp(44)
             minimumWidth = 0
             setPadding(dp(12), dp(10), dp(12), dp(10))
@@ -249,10 +248,8 @@ class ToolPaletteView(
         return Button(context).apply {
             text = label
             isAllCaps = false
-            minHeight = dp(40)
             minimumHeight = dp(40)
             minimumWidth = 0
-            minWidth = 0
             setPadding(dp(14), dp(0), dp(14), dp(0))
             background = paletteButtonBackground(closeButtonTint)
             setTextColor(Color.WHITE)
@@ -273,8 +270,6 @@ class ToolPaletteView(
                 setStroke(dp(1), "#66FFFFFF".toColorInt())
             }
             minimumWidth = 0
-            minWidth = 0
-            minHeight = dp(36)
             minimumHeight = dp(36)
             setPadding(dp(10), dp(8), dp(10), dp(8))
         }
