@@ -50,6 +50,9 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
     private val verticalMarginPx: Int
         get() = dp(24)
 
+    private val paletteBottomPeekPx: Int
+        get() = dp(84)
+
     override fun onCreate() {
         super.onCreate()
         windowManager = getSystemService(WindowManager::class.java)
@@ -351,6 +354,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             fallbackWidthPx = dp(320),
             fallbackHeightPx = dp(360),
             snapToHorizontalEdge = true,
+            bottomVisibleHeightPx = paletteBottomPeekPx,
         ) { x, y ->
             palettePositionX = x
             palettePositionY = y
@@ -461,6 +465,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
         fallbackWidthPx: Int,
         fallbackHeightPx: Int,
         snapToHorizontalEdge: Boolean,
+        bottomVisibleHeightPx: Int = fallbackHeightPx,
         onPositionChanged: (x: Int, y: Int) -> Unit = { _, _ -> },
     ) {
         val touchSlop = ViewConfiguration.get(this).scaledTouchSlop
@@ -498,6 +503,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
                                 overlayHeight = currentOverlayHeight(windowView, fallbackHeightPx),
                                 horizontalMargin = horizontalMarginPx,
                                 verticalMargin = verticalMarginPx,
+                                bottomVisibleHeight = bottomVisibleHeightPx,
                             )
                             params.x = coordinates.x
                             params.y = coordinates.y
@@ -524,6 +530,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
                                 overlayHeight = currentOverlayHeight(windowView, fallbackHeightPx),
                                 horizontalMargin = horizontalMarginPx,
                                 verticalMargin = verticalMarginPx,
+                                bottomVisibleHeight = bottomVisibleHeightPx,
                             )
                             params.x = coordinates.x
                             params.y = coordinates.y

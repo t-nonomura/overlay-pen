@@ -22,6 +22,24 @@ class OverlayPositioningTest {
     }
 
     @Test
+    fun clampAllowsBottomOverflowWhenPeekHeightProvided() {
+        val coordinates = OverlayPositioning.clamp(
+            requestedX = 120,
+            requestedY = 3000,
+            screenWidth = 1080,
+            screenHeight = 2400,
+            overlayWidth = 320,
+            overlayHeight = 360,
+            horizontalMargin = 16,
+            verticalMargin = 24,
+            bottomVisibleHeight = 84,
+        )
+
+        assertEquals(120, coordinates.x)
+        assertEquals(2292, coordinates.y)
+    }
+
+    @Test
     fun snapToHorizontalEdgeChoosesLeftDockWhenCloserToLeft() {
         val snappedX = OverlayPositioning.snapToHorizontalEdge(
             currentX = 90,

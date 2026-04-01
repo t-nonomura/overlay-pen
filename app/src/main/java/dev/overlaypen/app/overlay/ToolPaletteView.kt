@@ -12,11 +12,13 @@ import android.view.View
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.HorizontalScrollView
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.core.graphics.toColorInt
 import dev.overlaypen.app.R
+import dev.overlaypen.app.model.PenType
 import dev.overlaypen.app.model.ToolMode
 
 @SuppressLint("ViewConstructor")
@@ -35,16 +37,30 @@ class ToolPaletteView(
     private val accentColor = "#EE9B00".toColorInt()
     private val activeButtonTint = "#0B7285".toColorInt()
     private val inactiveButtonTint = "#D9E2EC".toColorInt()
+    private val closeButtonTint = "#C0392B".toColorInt()
+    private val iconTint = "#102A43".toColorInt()
     private val colorSwatches = mutableMapOf<Int, View>()
 
-    private val penButton = paletteButton(context.getString(R.string.palette_pen)) { session.updateTool(ToolMode.PEN) }
-    private val eraserButton = paletteButton(context.getString(R.string.palette_eraser)) { session.updateTool(ToolMode.ERASER) }
-    private val undoButton = paletteButton(context.getString(R.string.palette_undo)) { session.undo() }
-    private val redoButton = paletteButton(context.getString(R.string.palette_redo)) { session.redo() }
-    private val typeButton = paletteButton(context.getString(R.string.tool_type_format, "")) { session.cyclePenType() }
-    private val clearButton = paletteButton(context.getString(R.string.palette_clear)) { callbacks.onClearAnnotations() }
-    private val closeButton = paletteButton(context.getString(R.string.palette_close)) { callbacks.onStopOverlay() }
-    private val dragHandle = paletteHandle(context.getString(R.string.palette_move))
+    private val penButton = paletteIconButton(R.drawable.overlay_tool_pen, context.getString(R.string.palette_pen)) {
+        session.updateTool(ToolMode.PEN)
+    }
+    private val eraserButton = paletteIconButton(R.drawable.overlay_tool_eraser, context.getString(R.string.palette_eraser)) {
+        session.updateTool(ToolMode.ERASER)
+    }
+    private val undoButton = paletteIconButton(R.drawable.overlay_tool_undo, context.getString(R.string.palette_undo)) {
+        session.undo()
+    }
+    private val redoButton = paletteIconButton(R.drawable.overlay_tool_redo, context.getString(R.string.palette_redo)) {
+        session.redo()
+    }
+    private val typeButton = paletteIconButton(R.drawable.overlay_tool_pen_solid, context.getString(R.string.tool_type_format, "")) {
+        session.cyclePenType()
+    }
+    private val clearButton = paletteIconButton(R.drawable.overlay_tool_clear, context.getString(R.string.palette_clear)) {
+        callbacks.onClearAnnotations()
+    }
+    private val closeButton = paletteCloseButton(context.getString(R.string.palette_close)) { callbacks.onStopOverlay() }
+    private val dragHandle = paletteHandleIcon(R.drawable.overlay_tool_move, context.getString(R.string.palette_move))
     private val collapseHandle = paletteHandle(context.getString(R.string.palette_hide)) { callbacks.onCollapsePalette() }
     private val widthValue = paletteLabel("")
     private val opacityValue = paletteLabel("")
@@ -73,7 +89,7 @@ class ToolPaletteView(
         addView(spacer(8))
         addView(buttonRow(redoButton, typeButton, clearButton))
         addView(spacer(8))
-        addView(buttonRow(closeButton))
+        addView(footerRow())
         addView(spacer(12))
         addView(colorRow())
         addView(spacer(12))
@@ -181,7 +197,7 @@ class ToolPaletteView(
         }
     }
 
-    private fun buttonRow(vararg buttons: Button): View {
+    private fun buttonRow(vararg buttons: View): View {
         return LinearLayout(context).apply {
             orientation = HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
@@ -197,14 +213,69 @@ class ToolPaletteView(
         }
     }
 
-    private fun paletteButton(label: String, onClick: () -> Unit): Button {
+    private fun footerRow(): View {
+        return LinearLayout(context).apply {
+            orientation = HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            addView(View(context).apply {
+                layoutParams = LayoutParams(0, 1, 1f)
+            })
+            addView(closeButton)
+        }
+    }
+
+    private fun paletteIconButton(
+        iconRes: Int,
+        contentDescriptionText: String,
+        onClick: () -> Unit,
+    ): ImageButton {
+        return ImageButton(context).apply {
+            setImageResource(iconRes)
+            contentDescription = contentDescriptionText
+            scaleType = ImageButton.ScaleType.CENTER
+            adjustViewBounds = true
+            imageTintList = ColorStateList.valueOf(iconTint)
+            background = paletteButtonBackground(inactiveButtonTint)
+            minHeight = dp(44)
+            minimumHeight = dp(44)
+            minimumWidth = 0
+            setPadding(dp(12), dp(10), dp(12), dp(10))
+            setOnClickListener { onClick() }
+        }
+    }
+
+    private fun paletteCloseButton(label: String, onClick: () -> Unit): Button {
         return Button(context).apply {
             text = label
             isAllCaps = false
             minHeight = dp(40)
             minimumHeight = dp(40)
-            backgroundTintList = ColorStateList.valueOf(inactiveButtonTint)
+            minimumWidth = 0
+            minWidth = 0
+            setPadding(dp(14), dp(0), dp(14), dp(0))
+            background = paletteButtonBackground(closeButtonTint)
+            setTextColor(Color.WHITE)
             setOnClickListener { onClick() }
+        }
+    }
+
+    private fun paletteHandleIcon(iconRes: Int, contentDescriptionText: String): View {
+        return ImageButton(context).apply {
+            setImageResource(iconRes)
+            contentDescription = contentDescriptionText
+            scaleType = ImageButton.ScaleType.CENTER
+            imageTintList = ColorStateList.valueOf(panelLabelColor)
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = dp(18).toFloat()
+                setColor("#335B7083".toColorInt())
+                setStroke(dp(1), "#66FFFFFF".toColorInt())
+            }
+            minimumWidth = 0
+            minWidth = 0
+            minHeight = dp(36)
+            minimumHeight = dp(36)
+            setPadding(dp(10), dp(8), dp(10), dp(8))
         }
     }
 
@@ -249,19 +320,25 @@ class ToolPaletteView(
         val brush = session.currentBrush()
         val hasStrokes = session.hasStrokes()
         val hasRedoHistory = session.hasRedoHistory()
-        penButton.backgroundTintList = ColorStateList.valueOf(
-            if (brush.toolMode == ToolMode.PEN) activeButtonTint else inactiveButtonTint,
-        )
-        eraserButton.backgroundTintList = ColorStateList.valueOf(
-            if (brush.toolMode == ToolMode.ERASER) activeButtonTint else inactiveButtonTint,
-        )
+        penButton.background = paletteButtonBackground(if (brush.toolMode == ToolMode.PEN) activeButtonTint else inactiveButtonTint)
+        eraserButton.background = paletteButtonBackground(if (brush.toolMode == ToolMode.ERASER) activeButtonTint else inactiveButtonTint)
         undoButton.isEnabled = hasStrokes
         redoButton.isEnabled = hasRedoHistory
         clearButton.isEnabled = hasStrokes
         undoButton.alpha = if (hasStrokes) 1f else 0.55f
         redoButton.alpha = if (hasRedoHistory) 1f else 0.55f
         clearButton.alpha = if (hasStrokes) 1f else 0.55f
-        typeButton.text = context.getString(R.string.tool_type_format, context.getString(brush.penType.labelResId()))
+        typeButton.setImageResource(
+            when (brush.penType) {
+                PenType.SOLID -> R.drawable.overlay_tool_pen_solid
+                PenType.HIGHLIGHTER -> R.drawable.overlay_tool_pen_highlighter
+                PenType.DASHED -> R.drawable.overlay_tool_pen_dashed
+            },
+        )
+        typeButton.contentDescription = context.getString(
+            R.string.tool_type_format,
+            context.getString(brush.penType.labelResId()),
+        )
         widthValue.text = context.getString(R.string.tool_width_format, brush.strokeWidthDp.toInt())
         opacityValue.text = context.getString(R.string.tool_opacity_format, (brush.opacity * 100).toInt())
         widthSeekBar.progress = (brush.strokeWidthDp - 2f).toInt()
@@ -276,6 +353,14 @@ class ToolPaletteView(
                 setColor(color)
                 setStroke(dp(if (selected) 2 else 1), accentColor)
             }
+        }
+    }
+
+    private fun paletteButtonBackground(color: Int): GradientDrawable {
+        return GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = dp(14).toFloat()
+            setColor(color)
         }
     }
 
