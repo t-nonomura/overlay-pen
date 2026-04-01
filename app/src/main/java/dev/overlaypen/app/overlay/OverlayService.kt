@@ -161,8 +161,8 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             PixelFormat.TRANSLUCENT,
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = bubblePositionX ?: dp(24)
-            y = bubblePositionY ?: dp(160)
+            x = bubblePositionX ?: horizontalMarginPx
+            y = bubblePositionY ?: verticalMarginPx
         }
         bubbleParams = params
         bubbleView = createBubbleView(params)
@@ -286,8 +286,8 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             PixelFormat.TRANSLUCENT,
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = palettePositionX ?: defaultPaletteX()
-            y = palettePositionY ?: verticalMarginPx
+            x = bubblePositionX ?: horizontalMarginPx
+            y = bubblePositionY ?: verticalMarginPx
         }
     }
 
@@ -411,8 +411,8 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
                 fallbackHeightPx = dp(54),
                 snapToHorizontalEdge = false,
             ) { x, y ->
-                palettePositionX = x
-                palettePositionY = y
+                bubblePositionX = x
+                bubblePositionY = y
             }
         }
     }
