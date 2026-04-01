@@ -51,7 +51,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
         get() = dp(24)
 
     private val paletteBottomPeekPx: Int
-        get() = dp(84)
+        get() = dp(44)
 
     override fun onCreate() {
         super.onCreate()
