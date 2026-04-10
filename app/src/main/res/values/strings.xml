@@ -23,7 +23,7 @@
     <string name="status_card_title">権限の状態</string>
     <string name="status_card_granted">オーバーレイ権限は有効です。フローティングボタンをすぐに表示できます。</string>
     <string name="status_card_missing">オーバーレイ権限がまだ必要です。フローティングボタンを表示するには設定画面で許可してください。</string>
-    <string name="spec_card_title">現在のプロトタイプ</string>
+    <string name="spec_card_title">主な機能</string>
     <string name="spec_line_1">フローティングボタンから、どのアプリ上でも描画モードを開けます。</string>
     <string name="spec_line_2">描画中は下のアプリを誤操作しないよう、タッチをブロックします。</string>
     <string name="spec_line_3">表示専用モードでは、ウィンドウ alpha を 0.78 に固定して描画を残します。</string>

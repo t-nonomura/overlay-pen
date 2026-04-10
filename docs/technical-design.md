@@ -5,68 +5,44 @@
 - Platform: Android native
 - Language: Kotlin
 - Minimum OS: Android 12
-- UI split:
-  - Activity onboarding: Jetpack Compose
-  - Overlay runtime: `WindowManager` + custom `View`
-
-## Why This Architecture
-
-- オーバーレイ描画は `WindowManager` と通常 `View` の方がタッチ制御と描画制御を明示しやすい
-- Activity 側は Compose の方が権限説明やステータス表示を短く保守しやすい
-- 描画を永続化しないため、ローカル DB やファイル層は V1 では不要
+- Activity onboarding: Jetpack Compose
+- Overlay runtime: `WindowManager` + custom `View`
 
 ## Current Implementation Status
 
-- `MainActivity` は Compose で実装されており、権限状態表示、権限設定導線、overlay 開始・停止ボタンを持つ
-- Overlay 実行中は `OverlayService` が Foreground Service として常駐する
-- runtime UI は複数 window に分割されている
-  - フローティングボタン
-  - interactive な描画キャンバス
-  - passive annotation 用キャンバス
-  - 描画ツールパレット
-  - compact な `Tools` チップ
-- 描画データは `DrawingSessionStore` にメモリ保持し、終了時に破棄する
-- 位置計算は `OverlayPositioning` に切り出され、単体テストで clamp / 左右端吸着を確認している
-- `OverlayCanvasView` は確定済みストロークを bitmap キャッシュへ描き込み、入力中ストロークだけを前景で再描画する
-
-## Commercialization Direction
-
-- ファーストリリースは無料版のみを想定する
-- V1 では Google Play Billing や entitlement 判定を必須依存にしない
-- 将来の有料版に備える場合は、機能境界を UI と状態管理の両面で分離し、内部 flag で無効化できる構造を優先する
-- 課金導線や購入状態の永続化は、需要確認と運用体制整理が済むまで実装しない
+- `MainActivity` で権限案内、開始 / 停止導線、状態説明を提供
+- `OverlayService` で foreground service と複数 overlay window を管理
+- `DrawingSessionStore` でブラシ設定、ストローク、Undo / Redo を管理
+- `OverlayCanvasView` で bitmap ベースの描画を実装
+- `ToolPaletteView` でツール操作、色、太さ、透明度、線種を提供
+- `OverlayPositioning` で bubble / panel / chip の配置制御を実装
 
 ## Runtime Components
 
 ### `MainActivity`
 
-- Overlay 権限状態の確認
-- 権限設定画面への導線
-- Overlay service の開始と停止
-- 現在のプロトタイプ仕様を画面上で説明
+- 権限案内
+- 設定画面への導線
+- overlay の開始 / 停止
 
 ### `OverlayService`
 
-- Foreground Service として常駐
-- 通知の表示
-- フローティングボタン、描画キャンバス、ツールパレットの lifecycle 管理
-- `Hide`、通知からの `Resume`、`Clear`、`Stop` を処理
-- bubble と palette / chip の位置をセッション中だけ保持する
+- foreground service の常駐
+- bubble、canvas、palette、chip の lifecycle 管理
+- `Hide`、`Resume`、`Clear`、`Stop` の遷移管理
 
 ### `DrawingSessionStore`
 
 - 現在のブラシ設定
-- 描画ストローク一覧
-- Undo
-- リスナー通知
+- ストローク一覧
+- Undo / Redo
+- セッション単位の描画状態
 
 ### `OverlayCanvasView`
 
 - ストローク描画
-- 入力中ストロークのプレビュー
-- 消しゴムは `BlendMode.CLEAR` で実装
-- 座標は正規化して保持し、画面サイズ変化に追従しやすくする
-- 確定済みストロークは bitmap キャッシュへ描き込み、入力中だけを前面で再描画する
+- bitmap キャッシュ
+- `BlendMode.CLEAR` による消しゴム
 
 ### `ToolPaletteView`
 
@@ -74,62 +50,40 @@
 - 消しゴム
 - アンドゥ
 - リドゥ
-- クリア
-- 太さ
-- 透明度
-- 色
-- ペン種別切り替え
-- Close
-- Move ハンドルによる再配置
-- ストロークがないときは `Undo` と `Clear` を無効化し、redo 履歴がないときは `Redo` を無効化
-- `Hide` では interactive canvas を外し、passive overlay と compact な `Tools` チップへ切り替える
-
-### `OverlayPositioning`
-
-- 画面内に収まるよう overlay 座標を clamp する
-- 描画パネルを左右端へ吸着させる
-- `WindowManager` 依存を分離し、単体テストしやすい形で保持する
+- 全消し
+- 線種切り替え
+- 太さ、透明度、色の調整
+- `Hide` と `Close`
 
 ## Overlay States
 
 1. Idle
-   - フローティングボタンのみ
+   - overlay 非表示
 2. Drawing
-   - 全画面キャンバスとツールパレットを表示
-   - 下位アプリのタッチはブロック
+   - 全画面 canvas と palette を表示
+   - 下位アプリへの touch は block
 3. Passive Annotation
    - 描画だけを残す
-   - compact な `Tools` チップを表示する
-   - overlay window alpha は `0.78`
+   - compact な `Tools` チップを表示
+   - overlay alpha は `0.78`
 4. Stopped
-   - すべての window と描画を破棄
+   - window とセッションを終了
 
 ## Implemented Behavior Notes
 
-- Passive Annotation では overlay alpha を `0.78` に固定している
-- `Hide` はセッション終了ではなく、描画入力を止めて `Tools` チップへ切り替える動作
-- `Clear` はセッションを維持したままストロークだけを消去する
-- 描画座標は正規化して保持するため、同一セッション中の view サイズ変化に追従しやすい
-- persistence は未実装で、アプリ再起動をまたぐ復元は行わない
+- `Hide` では interactive canvas を閉じ、描画だけを残す
+- `Clear` はセッションを維持したまま描画だけを消す
+- セッション終了時は描画を完全に破棄する
+- bubble と chip の位置はドラッグ位置を保持する
 
 ## Tradeoffs Accepted For V1
 
-- 描画保存はしない
-- 一部アプリでは overlay 非表示の可能性がある
-- Passive Annotation では描画自体も 78 パーセント相当の見え方になる
-- bubble とパネル位置はセッション内保持のみで、アプリ再起動をまたいでは保持しない
-- 画面端吸着は左右のみで、上下方向は安全マージン付きの clamp に留める
-- premium 候補機能を先行実装する場合も、公開版では無料体験を複雑化させない
+- 保存や共有は V1 では扱わない
+- Passive Annotation では下位アプリ操作を優先して alpha `0.78` を採用する
+- 一部アプリで overlay が隠される可能性は既知制約として扱う
 
 ## Validation Status
 
-- `DrawingSessionStore` のストローク保持、色変更時のツール復帰、全消しは unit test 済み
-- `OverlayPositioning` の clamp と左右端吸着は unit test 済み
-- 実機での overlay 制約確認、OEM 差分確認、長時間稼働確認は未完了
-
-## Next Technical Steps
-
-1. 実機で Pixel と Galaxy の overlay 挙動を確認する
-2. Android 12 から 15 の Passive Annotation 体験を記録し、仕様文言を固定する
-3. 画面回転、マルチウィンドウ、再入場時の window 再構成を検証する
-4. OEM ごとのバックグラウンド制限と overlay 非表示条件を整理する
+- `DrawingSessionStore` の描画状態と Redo は unit test 済み
+- `OverlayPositioning` の clamp は unit test 済み
+- 実機での OEM 差分確認は継続中
