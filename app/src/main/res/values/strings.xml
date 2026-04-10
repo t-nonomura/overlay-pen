@@ -43,6 +43,9 @@
     <string name="palette_close">終了</string>
     <string name="palette_width">太さ</string>
     <string name="palette_opacity">透明度</string>
+    <string name="compact_draw_toggle_on">ON</string>
+    <string name="compact_draw_toggle_off">OFF</string>
+    <string name="compact_draw_toggle_description">最小化状態の描画モード切り替え</string>
     <string name="pen_type_solid">通常</string>
     <string name="pen_type_highlighter">蛍光</string>
     <string name="pen_type_dashed">破線</string>

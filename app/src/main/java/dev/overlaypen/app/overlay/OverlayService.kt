@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.graphics.PixelFormat
+import android.graphics.drawable.GradientDrawable
 import android.os.IBinder
 import android.provider.Settings
 import android.view.Gravity
@@ -43,6 +44,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
     private var palettePositionX: Int? = null
     private var palettePositionY: Int? = null
     private var paletteCollapsed = false
+    private var compactDrawingEnabled = false
 
     private val horizontalMarginPx: Int
         get() = dp(16)
@@ -104,14 +106,21 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
         }
         if (paletteCollapsed) {
             removeBubble()
+            if (compactDrawingEnabled) {
+                removePassiveCanvas()
+                ensureCompactDrawingCanvas()
+            } else {
+                removeCompactDrawingCanvas()
+            }
             showCollapsedPaletteChip()
         } else {
+            removeCompactDrawingCanvas()
             removePaletteChip()
             if (bubbleView == null) {
                 showBubble()
             }
         }
-        if (session.hasStrokes()) {
+        if (session.hasStrokes() && !compactDrawingEnabled) {
             showPassiveCanvas()
         } else {
             removePassiveCanvas()
@@ -124,6 +133,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             return
         }
         paletteCollapsed = false
+        compactDrawingEnabled = false
         removePassiveCanvas()
         removeBubble()
         removePaletteChip()
@@ -141,9 +151,9 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
 
     private fun collapseIntoPassiveToolsChip() {
         paletteCollapsed = true
+        compactDrawingEnabled = false
         removeExpandedPalette()
-        drawingCanvasView?.let { windowManager.removeView(it) }
-        drawingCanvasView = null
+        removeCompactDrawingCanvas()
         if (session.hasStrokes()) {
             showPassiveCanvas()
         } else {
@@ -198,8 +208,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
     }
 
     private fun removeDrawingViews() {
-        drawingCanvasView?.let { windowManager.removeView(it) }
-        drawingCanvasView = null
+        removeCompactDrawingCanvas()
         toolPaletteView?.let { windowManager.removeView(it) }
         toolPaletteView = null
         paletteChipView?.let { windowManager.removeView(it) }
@@ -389,30 +398,51 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             setPadding(dp(12), dp(10), dp(14), dp(10))
             background = getDrawable(R.drawable.overlay_chip_bg)
             elevation = 18f
-            setOnClickListener {
-                paletteCollapsed = false
-                enterDrawingMode()
+
+            val launcherBody = LinearLayout(context).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                setOnClickListener {
+                    paletteCollapsed = false
+                    compactDrawingEnabled = false
+                    enterDrawingMode()
+                }
+
+                addView(
+                    createLauncherIconView(
+                        sizeDp = 34,
+                        iconSizeDp = 16,
+                    ),
+                )
+
+                addView(
+                    createLauncherLabelView(
+                        text = getString(R.string.bubble_label),
+                        textSizeSp = 13f,
+                    ),
+                )
             }
 
-            addView(
-                createLauncherIconView(
-                    sizeDp = 34,
-                    iconSizeDp = 16,
-                ),
-            )
+            val toggleButton = TextView(context).apply {
+                updateCompactDrawingToggle()
+                setOnClickListener {
+                    post { setCompactDrawingEnabled(!compactDrawingEnabled) }
+                }
+            }
 
+            addView(launcherBody)
             addView(
-                createLauncherLabelView(
-                    text = getString(R.string.bubble_label),
-                    textSizeSp = 13f,
-                ),
+                View(context).apply {
+                    layoutParams = LinearLayout.LayoutParams(dp(8), 1)
+                },
             )
+            addView(toggleButton)
         }.also { chip ->
             attachDragTouchListener(
-                touchTarget = chip,
+                touchTarget = chip.getChildAt(0),
                 windowView = chip,
                 params = params,
-                fallbackWidthPx = dp(112),
+                fallbackWidthPx = dp(180),
                 fallbackHeightPx = dp(54),
                 snapToHorizontalEdge = false,
             ) { x, y ->
@@ -420,6 +450,54 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
                 bubblePositionY = y
             }
         }
+    }
+
+    private fun TextView.updateCompactDrawingToggle() {
+        val enabled = compactDrawingEnabled
+        text = getString(if (enabled) R.string.compact_draw_toggle_on else R.string.compact_draw_toggle_off)
+        contentDescription = getString(R.string.compact_draw_toggle_description)
+        textSize = 12f
+        letterSpacing = 0.04f
+        setTypeface(typeface, Typeface.BOLD)
+        setTextColor(if (enabled) 0xFFFFFFFF.toInt() else 0xFF102A43.toInt())
+        setPadding(dp(12), dp(8), dp(12), dp(8))
+        background = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = dp(18).toFloat()
+            setColor(if (enabled) 0xFF0B7285.toInt() else 0xFFD9E2EC.toInt())
+        }
+    }
+
+    private fun setCompactDrawingEnabled(enabled: Boolean) {
+        compactDrawingEnabled = enabled
+        if (enabled) {
+            removePassiveCanvas()
+            ensureCompactDrawingCanvas()
+        } else {
+            removeCompactDrawingCanvas()
+            if (session.hasStrokes()) {
+                showPassiveCanvas()
+            } else {
+                removePassiveCanvas()
+            }
+        }
+        if (paletteCollapsed) {
+            removePaletteChip()
+            showCollapsedPaletteChip()
+        }
+    }
+
+    private fun ensureCompactDrawingCanvas() {
+        if (drawingCanvasView != null) {
+            return
+        }
+        drawingCanvasView = OverlayCanvasView(this, session, acceptsInput = true)
+        windowManager.addView(drawingCanvasView, createFullscreenParams(flags = interactiveFlags()))
+    }
+
+    private fun removeCompactDrawingCanvas() {
+        drawingCanvasView?.let { windowManager.removeView(it) }
+        drawingCanvasView = null
     }
 
     private fun createLauncherIconView(
