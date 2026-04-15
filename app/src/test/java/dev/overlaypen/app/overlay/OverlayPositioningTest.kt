@@ -41,6 +41,24 @@ class OverlayPositioningTest {
     }
 
     @Test
+    fun clampAllowsHorizontalOverflowWhenMinimumVisibleWidthIsSmallerThanOverlay() {
+        val coordinates = OverlayPositioning.clamp(
+            requestedX = -400,
+            requestedY = 48,
+            screenWidth = 1080,
+            screenHeight = 2400,
+            overlayWidth = 320,
+            overlayHeight = 360,
+            horizontalMargin = 16,
+            verticalMargin = 24,
+            minimumVisibleWidth = 120,
+        )
+
+        assertEquals(-184, coordinates.x)
+        assertEquals(48, coordinates.y)
+    }
+
+    @Test
     fun snapToHorizontalEdgeChoosesLeftDockWhenCloserToLeft() {
         val snappedX = OverlayPositioning.snapToHorizontalEdge(
             currentX = 90,
@@ -62,5 +80,18 @@ class OverlayPositioningTest {
         )
 
         assertEquals(924, snappedX)
+    }
+
+    @Test
+    fun snapToHorizontalEdgeAllowsHorizontalOverflowWhenMinimumVisibleWidthIsSmallerThanOverlay() {
+        val snappedX = OverlayPositioning.snapToHorizontalEdge(
+            currentX = 780,
+            screenWidth = 1080,
+            overlayWidth = 320,
+            horizontalMargin = 16,
+            minimumVisibleWidth = 120,
+        )
+
+        assertEquals(944, snappedX)
     }
 }

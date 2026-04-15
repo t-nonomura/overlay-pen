@@ -61,6 +61,7 @@ class ToolPaletteView(
         callbacks.onClearAnnotations()
     }
     private val closeButton = paletteCloseButton(context.getString(R.string.palette_close)) { callbacks.onStopOverlay() }
+    private val titleHandle = paletteLabel(context.getString(R.string.palette_title), 18f, true)
     private val dragHandle = paletteHandleIcon(R.drawable.overlay_tool_move, context.getString(R.string.palette_move))
     private val collapseHandle = paletteHandle(context.getString(R.string.palette_hide)) { callbacks.onCollapsePalette() }
     private val widthValue = paletteLabel("")
@@ -106,7 +107,7 @@ class ToolPaletteView(
         refreshFromSession()
     }
 
-    fun dragHandleView(): View = dragHandle
+    fun dragHandleViews(): List<View> = listOf(titleHandle, dragHandle)
 
     override fun onDetachedFromWindow() {
         session.removeListener(sessionListener)
@@ -187,7 +188,7 @@ class ToolPaletteView(
         return LinearLayout(context).apply {
             orientation = HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            addView(paletteLabel(context.getString(R.string.palette_title), 18f, true).apply {
+            addView(titleHandle.apply {
                 layoutParams = LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f)
             })
             addView(dragHandle)

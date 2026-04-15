@@ -15,12 +15,14 @@ object OverlayPositioning {
         overlayHeight: Int,
         horizontalMargin: Int,
         verticalMargin: Int,
+        minimumVisibleWidth: Int = overlayWidth,
         minimumVisibleHeight: Int = overlayHeight,
         bottomMargin: Int = verticalMargin,
     ): OverlayCoordinates {
-        val minX = horizontalMargin
+        val clampedVisibleWidth = minimumVisibleWidth.coerceIn(1, overlayWidth)
+        val minX = (horizontalMargin + clampedVisibleWidth - overlayWidth)
         val minY = verticalMargin
-        val maxX = (screenWidth - overlayWidth - horizontalMargin).coerceAtLeast(minX)
+        val maxX = (screenWidth - clampedVisibleWidth - horizontalMargin).coerceAtLeast(minX)
         val clampedVisibleHeight = minimumVisibleHeight.coerceIn(1, overlayHeight)
         val maxY = (screenHeight - clampedVisibleHeight - bottomMargin).coerceAtLeast(minY)
         return OverlayCoordinates(
@@ -34,9 +36,11 @@ object OverlayPositioning {
         screenWidth: Int,
         overlayWidth: Int,
         horizontalMargin: Int,
+        minimumVisibleWidth: Int = overlayWidth,
     ): Int {
-        val leftDock = horizontalMargin
-        val rightDock = (screenWidth - overlayWidth - horizontalMargin).coerceAtLeast(leftDock)
+        val clampedVisibleWidth = minimumVisibleWidth.coerceIn(1, overlayWidth)
+        val leftDock = horizontalMargin + clampedVisibleWidth - overlayWidth
+        val rightDock = (screenWidth - clampedVisibleWidth - horizontalMargin).coerceAtLeast(leftDock)
         val overlayMidpoint = currentX + (overlayWidth / 2)
         val screenMidpoint = screenWidth / 2
         return if (overlayMidpoint < screenMidpoint) leftDock else rightDock

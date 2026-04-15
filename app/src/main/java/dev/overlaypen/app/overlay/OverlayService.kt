@@ -55,6 +55,9 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
     private val expandedPaletteMinimumVisibleHeightPx: Int
         get() = dp(104)
 
+    private val expandedPaletteMinimumVisibleWidthPx: Int
+        get() = dp(120)
+
     override fun onCreate() {
         super.onCreate()
         windowManager = getSystemService(WindowManager::class.java)
@@ -245,7 +248,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             )
         }.also { bubble ->
             attachDragTouchListener(
-                touchTarget = bubble,
+                touchTargets = listOf(bubble),
                 windowView = bubble,
                 params = params,
                 fallbackWidthPx = dp(126),
@@ -357,11 +360,12 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
         val paletteParams = createPaletteParams()
         windowManager.addView(toolPaletteView, paletteParams)
         attachDragTouchListener(
-            touchTarget = toolPaletteView!!.dragHandleView(),
+            touchTargets = toolPaletteView!!.dragHandleViews(),
             windowView = toolPaletteView!!,
             params = paletteParams,
             fallbackWidthPx = dp(320),
             fallbackHeightPx = dp(360),
+            minimumVisibleWidthPx = expandedPaletteMinimumVisibleWidthPx,
             minimumVisibleHeightPx = expandedPaletteMinimumVisibleHeightPx,
             snapToHorizontalEdge = true,
             bottomMarginPx = 0,
@@ -439,7 +443,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             addView(toggleButton)
         }.also { chip ->
             attachDragTouchListener(
-                touchTarget = chip.getChildAt(0),
+                touchTargets = listOf(chip.getChildAt(0)),
                 windowView = chip,
                 params = params,
                 fallbackWidthPx = dp(180),
@@ -538,18 +542,19 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
     }
 
     private fun attachDragTouchListener(
-        touchTarget: View,
+        touchTargets: List<View>,
         windowView: View,
         params: WindowManager.LayoutParams,
         fallbackWidthPx: Int,
         fallbackHeightPx: Int,
+        minimumVisibleWidthPx: Int = fallbackWidthPx,
         minimumVisibleHeightPx: Int = fallbackHeightPx,
         snapToHorizontalEdge: Boolean,
         bottomMarginPx: Int = verticalMarginPx,
         onPositionChanged: (x: Int, y: Int) -> Unit = { _, _ -> },
     ) {
         val touchSlop = ViewConfiguration.get(this).scaledTouchSlop
-        touchTarget.setOnTouchListener(object : View.OnTouchListener {
+        val listener = object : View.OnTouchListener {
             private var startX = 0
             private var startY = 0
             private var downRawX = 0f
@@ -584,6 +589,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
                                 overlayHeight = overlayHeight,
                                 horizontalMargin = horizontalMarginPx,
                                 verticalMargin = verticalMarginPx,
+                                minimumVisibleWidth = minimumVisibleWidthPx.coerceAtMost(currentOverlayWidth(windowView, fallbackWidthPx)),
                                 minimumVisibleHeight = minimumVisibleHeightPx.coerceAtMost(overlayHeight),
                                 bottomMargin = bottomMarginPx,
                             )
@@ -603,6 +609,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
                                 screenWidth = screenWidthPx(),
                                 overlayWidth = currentOverlayWidth(windowView, fallbackWidthPx),
                                 horizontalMargin = horizontalMarginPx,
+                                minimumVisibleWidth = minimumVisibleWidthPx.coerceAtMost(currentOverlayWidth(windowView, fallbackWidthPx)),
                             )
                             val coordinates = OverlayPositioning.clamp(
                                 requestedX = snappedX,
@@ -613,6 +620,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
                                 overlayHeight = overlayHeight,
                                 horizontalMargin = horizontalMarginPx,
                                 verticalMargin = verticalMarginPx,
+                                minimumVisibleWidth = minimumVisibleWidthPx.coerceAtMost(currentOverlayWidth(windowView, fallbackWidthPx)),
                                 minimumVisibleHeight = minimumVisibleHeightPx.coerceAtMost(overlayHeight),
                                 bottomMargin = bottomMarginPx,
                             )
@@ -620,7 +628,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
                             params.y = coordinates.y
                             windowManager.updateViewLayout(windowView, params)
                             onPositionChanged(params.x, params.y)
-                        } else if (!dragging && windowView === touchTarget) {
+                        } else if (!dragging && windowView === view) {
                             windowView.performClick()
                         }
                         return true
@@ -630,7 +638,8 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
                 }
                 return false
             }
-        })
+        }
+        touchTargets.forEach { it.setOnTouchListener(listener) }
     }
 
     private fun createNotificationChannel() {
