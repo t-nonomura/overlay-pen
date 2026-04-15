@@ -22,7 +22,7 @@ class OverlayPositioningTest {
     }
 
     @Test
-    fun clampAllowsBottomOverflowWhenPeekHeightProvided() {
+    fun clampAllowsBottomOverflowWhenMinimumVisibleHeightIsSmallerThanOverlay() {
         val coordinates = OverlayPositioning.clamp(
             requestedX = 120,
             requestedY = 3000,
@@ -32,12 +32,12 @@ class OverlayPositioningTest {
             overlayHeight = 360,
             horizontalMargin = 16,
             verticalMargin = 24,
-            bottomVisibleHeight = 84,
+            minimumVisibleHeight = 104,
             bottomMargin = 0,
         )
 
         assertEquals(120, coordinates.x)
-        assertEquals(2316, coordinates.y)
+        assertEquals(2296, coordinates.y)
     }
 
     @Test

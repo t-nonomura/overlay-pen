@@ -15,13 +15,14 @@ object OverlayPositioning {
         overlayHeight: Int,
         horizontalMargin: Int,
         verticalMargin: Int,
-        bottomVisibleHeight: Int = overlayHeight,
+        minimumVisibleHeight: Int = overlayHeight,
         bottomMargin: Int = verticalMargin,
     ): OverlayCoordinates {
         val minX = horizontalMargin
         val minY = verticalMargin
         val maxX = (screenWidth - overlayWidth - horizontalMargin).coerceAtLeast(minX)
-        val maxY = (screenHeight - bottomVisibleHeight - bottomMargin).coerceAtLeast(minY)
+        val clampedVisibleHeight = minimumVisibleHeight.coerceIn(1, overlayHeight)
+        val maxY = (screenHeight - clampedVisibleHeight - bottomMargin).coerceAtLeast(minY)
         return OverlayCoordinates(
             x = requestedX.coerceIn(minX, maxX),
             y = requestedY.coerceIn(minY, maxY),

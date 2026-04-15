@@ -9,6 +9,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.graphics.PixelFormat
+import android.graphics.PorterDuff
+import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.os.IBinder
 import android.provider.Settings
@@ -21,8 +23,6 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.graphics.PorterDuff
-import android.graphics.Typeface
 import androidx.core.app.NotificationCompat
 import dev.overlaypen.app.MainActivity
 import dev.overlaypen.app.R
@@ -52,8 +52,8 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
     private val verticalMarginPx: Int
         get() = dp(24)
 
-    private val paletteBottomPeekPx: Int
-        get() = dp(32)
+    private val expandedPaletteMinimumVisibleHeightPx: Int
+        get() = dp(104)
 
     override fun onCreate() {
         super.onCreate()
@@ -362,8 +362,8 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             params = paletteParams,
             fallbackWidthPx = dp(320),
             fallbackHeightPx = dp(360),
+            minimumVisibleHeightPx = expandedPaletteMinimumVisibleHeightPx,
             snapToHorizontalEdge = true,
-            bottomVisibleHeightPx = paletteBottomPeekPx,
             bottomMarginPx = 0,
         ) { x, y ->
             palettePositionX = x
@@ -543,8 +543,8 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
         params: WindowManager.LayoutParams,
         fallbackWidthPx: Int,
         fallbackHeightPx: Int,
+        minimumVisibleHeightPx: Int = fallbackHeightPx,
         snapToHorizontalEdge: Boolean,
-        bottomVisibleHeightPx: Int = fallbackHeightPx,
         bottomMarginPx: Int = verticalMarginPx,
         onPositionChanged: (x: Int, y: Int) -> Unit = { _, _ -> },
     ) {
@@ -574,16 +574,17 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
                             dragging = true
                         }
                         if (dragging) {
+                            val overlayHeight = currentOverlayHeight(windowView, fallbackHeightPx)
                             val coordinates = OverlayPositioning.clamp(
                                 requestedX = startX + dx,
                                 requestedY = startY + dy,
                                 screenWidth = screenWidthPx(),
                                 screenHeight = screenHeightPx(),
                                 overlayWidth = currentOverlayWidth(windowView, fallbackWidthPx),
-                                overlayHeight = currentOverlayHeight(windowView, fallbackHeightPx),
+                                overlayHeight = overlayHeight,
                                 horizontalMargin = horizontalMarginPx,
                                 verticalMargin = verticalMarginPx,
-                                bottomVisibleHeight = bottomVisibleHeightPx,
+                                minimumVisibleHeight = minimumVisibleHeightPx.coerceAtMost(overlayHeight),
                                 bottomMargin = bottomMarginPx,
                             )
                             params.x = coordinates.x
@@ -596,6 +597,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
 
                     MotionEvent.ACTION_UP -> {
                         if (dragging && snapToHorizontalEdge) {
+                            val overlayHeight = currentOverlayHeight(windowView, fallbackHeightPx)
                             val snappedX = OverlayPositioning.snapToHorizontalEdge(
                                 currentX = params.x,
                                 screenWidth = screenWidthPx(),
@@ -608,10 +610,10 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
                                 screenWidth = screenWidthPx(),
                                 screenHeight = screenHeightPx(),
                                 overlayWidth = currentOverlayWidth(windowView, fallbackWidthPx),
-                                overlayHeight = currentOverlayHeight(windowView, fallbackHeightPx),
+                                overlayHeight = overlayHeight,
                                 horizontalMargin = horizontalMarginPx,
                                 verticalMargin = verticalMarginPx,
-                                bottomVisibleHeight = bottomVisibleHeightPx,
+                                minimumVisibleHeight = minimumVisibleHeightPx.coerceAtMost(overlayHeight),
                                 bottomMargin = bottomMarginPx,
                             )
                             params.x = coordinates.x

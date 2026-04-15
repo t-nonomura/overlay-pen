@@ -12,6 +12,7 @@ Android 12 以上で使える、画面に重ねて描ける注釈ツールです
 - `OverlayService` で foreground service と overlay window を管理している
 - 描画、色変更、太さ変更、透明度変更、線種切り替え、消しゴム、アンドゥ、リドゥ、全消しに対応している
 - `Hide` で compact な `Tools` チップへ切り替えられる
+- 設定パネルはヘッダー操作を残したまま、下側へ少しはみ出す位置まで移動できる
 - クローズドテストとストア公開準備を進行中
 
 ## Implemented Features
@@ -21,6 +22,7 @@ Android 12 以上で使える、画面に重ねて描ける注釈ツールです
 - ペン / 消しゴム / アンドゥ / リドゥ / 全消し
 - 色、太さ、透明度、線種の調整
 - `Hide` による compact 表示
+- 最小化チップ上の `ON / OFF` による compact 描画切り替え
 - セッション終了時の描画クリア
 
 ## Known Gaps
@@ -62,4 +64,4 @@ Android 12 以上で使える、画面に重ねて描ける注釈ツールです
 ## Important Caveat
 
 `TYPE_APPLICATION_OVERLAY` は Android 12 以降で touch pass-through に制約があります。  
-そのため、表示専用状態では `LayoutParams.alpha` を `0.78` に固定し、下のアプリ操作を優先する設計を採用しています。詳しくは [feasibility-study.md](/D:/overlay-pen/docs/feasibility-study.md) を参照してください。
+そのため、表示専用状態では `LayoutParams.alpha` を `0.78` に固定し、下のアプリ操作を優先する設計を採用しています。詳しくは `docs/feasibility-study.md` を参照してください。
