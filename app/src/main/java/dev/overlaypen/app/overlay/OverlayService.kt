@@ -53,10 +53,16 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
         get() = dp(24)
 
     private val expandedPaletteMinimumVisibleHeightPx: Int
-        get() = dp(104)
+        get() = dp(72)
 
     private val expandedPaletteMinimumVisibleWidthPx: Int
         get() = dp(120)
+
+    private val expandedPaletteFallbackWidthPx: Int
+        get() = dp(288)
+
+    private val expandedPaletteFallbackHeightPx: Int
+        get() = dp(360)
 
     override fun onCreate() {
         super.onCreate()
@@ -363,8 +369,8 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             touchTargets = toolPaletteView!!.dragHandleViews(),
             windowView = toolPaletteView!!,
             params = paletteParams,
-            fallbackWidthPx = dp(320),
-            fallbackHeightPx = dp(360),
+            fallbackWidthPx = expandedPaletteFallbackWidthPx,
+            fallbackHeightPx = expandedPaletteFallbackHeightPx,
             minimumVisibleWidthPx = expandedPaletteMinimumVisibleWidthPx,
             minimumVisibleHeightPx = expandedPaletteMinimumVisibleHeightPx,
             snapToHorizontalEdge = true,
@@ -664,14 +670,14 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
     private fun defaultPaletteX(): Int {
         return OverlayPositioning.defaultRightDock(
             screenWidth = screenWidthPx(),
-            overlayWidth = dp(320),
+            overlayWidth = expandedPaletteFallbackWidthPx,
             horizontalMargin = horizontalMarginPx,
         )
     }
 
-    private fun screenWidthPx(): Int = resources.displayMetrics.widthPixels
+    private fun screenWidthPx(): Int = windowManager.currentWindowMetrics.bounds.width()
 
-    private fun screenHeightPx(): Int = resources.displayMetrics.heightPixels
+    private fun screenHeightPx(): Int = windowManager.currentWindowMetrics.bounds.height()
 
     private fun currentOverlayWidth(view: View, fallbackWidthPx: Int): Int {
         return view.width.takeIf { it > 0 } ?: fallbackWidthPx
