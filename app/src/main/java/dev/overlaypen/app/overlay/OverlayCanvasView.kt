@@ -27,7 +27,9 @@ class OverlayCanvasView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
 ) : View(context, attrs) {
     private val changeListener: () -> Unit = { postInvalidateOnAnimation() }
-    private val bitmapPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val bitmapPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        isFilterBitmap = false
+    }
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
@@ -55,14 +57,15 @@ class OverlayCanvasView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         syncCommittedBitmap()
-        val checkpoint = canvas.saveLayer(0f, 0f, width.toFloat(), height.toFloat(), null)
-        committedBitmap?.let { bitmap ->
-            canvas.drawBitmap(bitmap, 0f, 0f, bitmapPaint)
+        if (shouldUseCompositingLayer()) {
+            val checkpoint = canvas.saveLayer(0f, 0f, width.toFloat(), height.toFloat(), null)
+            drawCommittedContent(canvas)
+            drawInProgressContent(canvas)
+            canvas.restoreToCount(checkpoint)
+        } else {
+            drawCommittedContent(canvas)
+            drawInProgressContent(canvas)
         }
-        if (acceptsInput && inProgressPoints.isNotEmpty()) {
-            drawStroke(canvas, inProgressPoints, inProgressBrush)
-        }
-        canvas.restoreToCount(checkpoint)
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -123,6 +126,24 @@ class OverlayCanvasView @JvmOverloads constructor(
             x = (x / width.toFloat()).coerceIn(0f, 1f),
             y = (y / height.toFloat()).coerceIn(0f, 1f),
         )
+    }
+
+    private fun shouldUseCompositingLayer(): Boolean {
+        return acceptsInput &&
+            inProgressPoints.isNotEmpty() &&
+            inProgressBrush.toolMode == ToolMode.ERASER
+    }
+
+    private fun drawCommittedContent(canvas: Canvas) {
+        committedBitmap?.let { bitmap ->
+            canvas.drawBitmap(bitmap, 0f, 0f, bitmapPaint)
+        }
+    }
+
+    private fun drawInProgressContent(canvas: Canvas) {
+        if (acceptsInput && inProgressPoints.isNotEmpty()) {
+            drawStroke(canvas, inProgressPoints, inProgressBrush)
+        }
     }
 
     private fun drawStroke(canvas: Canvas, stroke: Stroke) {
