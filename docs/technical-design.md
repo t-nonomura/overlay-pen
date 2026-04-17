@@ -14,7 +14,7 @@
 - `OverlayService` で foreground service と複数 overlay window を管理
 - `DrawingSessionStore` でブラシ設定、ストローク、Undo / Redo を管理
 - `OverlayCanvasView` で bitmap ベースの描画を実装
-- `ToolPaletteView` でツール操作、色、太さ、透明度、線種を提供
+- `ToolPaletteView` でツール操作、色、太さ、不透明度、線種を提供
 - `OverlayPositioning` で bubble / panel / chip の配置制御を実装
 
 ## Runtime Components
@@ -52,7 +52,7 @@
 - リドゥ
 - 全消し
 - 線種切り替え
-- 太さ、透明度、色の調整
+- 太さ、不透明度、色の調整
 - `Hide` と `Close`
 
 ## Overlay States

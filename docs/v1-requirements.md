@@ -20,7 +20,7 @@
 - 全画面キャンバスでの描画
 - ペン / 消しゴム / アンドゥ / リドゥ / 全消し
 - 基本色: 黒 / 白 / 赤 / 青 / 黄
-- 太さ、透明度、線種の変更
+- 太さ、不透明度、線種の変更
 - `Hide` による compact `Tools` 表示
 
 ### Excluded From First Release
@@ -37,7 +37,7 @@
 | --- | --- | --- |
 | FR-01 Overlay Launcher | Implemented | フローティングボタンを表示して開始できる |
 | FR-02 Enter Drawing Mode | Implemented | 全画面キャンバスとツールパネルを表示する |
-| FR-03 Drawing Tools | Implemented | ペン、消しゴム、アンドゥ、リドゥ、全消し、色、太さ、透明度、線種に対応 |
+| FR-03 Drawing Tools | Implemented | ペン、消しゴム、アンドゥ、リドゥ、全消し、色、太さ、不透明度、線種に対応 |
 | FR-04 Exit Drawing Mode | Implemented with constraint | `Hide` により passive annotation へ移行し、alpha `0.78` を固定 |
 | FR-05 End Overlay Session | Implemented | セッション終了時に window と描画を破棄 |
 | FR-06 Settings and State | Partially implemented | 実機差分と OEM 検証は継続中 |
@@ -63,7 +63,7 @@
 - 全消し
 - 色変更
 - 太さ変更
-- 透明度変更
+- 不透明度変更
 - 線種変更
 
 ### FR-04 Exit Drawing Mode

@@ -31,7 +31,7 @@
     <string name="spec_line_5">非表示にすると、コンパクトなツールボタンに切り替わり、下のアプリを操作できます。</string>
     <string name="spec_line_6">全消しはセッションを終了させずに、描画だけを消します。</string>
     <string name="spec_line_7">セッションを終了すると、描画はメモリから完全に消えます。</string>
-    <string name="spec_line_8">ペン、消しゴム、アンドゥ、リドゥ、全消し、太さ、透明度、線の種類を使えます。</string>
+    <string name="spec_line_8">ペン、消しゴム、アンドゥ、リドゥ、全消し、太さ、不透明度、線の種類を使えます。</string>
     <string name="palette_title">最前面ペン</string>
     <string name="palette_move">移動</string>
     <string name="palette_hide">隠す</string>
@@ -42,7 +42,7 @@
     <string name="palette_clear">全消し</string>
     <string name="palette_close">終了</string>
     <string name="palette_width">太さ</string>
-    <string name="palette_opacity">透明度</string>
+    <string name="palette_opacity">不透明度</string>
     <string name="compact_draw_toggle_on">ON</string>
     <string name="compact_draw_toggle_off">OFF</string>
     <string name="compact_draw_toggle_description">最小化状態の描画モード切り替え</string>
