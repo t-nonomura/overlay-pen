@@ -509,16 +509,28 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
                 removePassiveCanvas()
             }
         }
-        refreshCompactDrawingToggleViews()
-        if (paletteCollapsed) {
-            removePaletteChip()
-            showCollapsedPaletteChip()
-        }
+        refreshVisibleCompactChip()
     }
 
     private fun refreshCompactDrawingToggleViews() {
         bubbleToggleView?.updateCompactDrawingToggle()
         paletteChipToggleView?.updateCompactDrawingToggle()
+    }
+
+    private fun refreshVisibleCompactChip() {
+        when {
+            paletteCollapsed -> {
+                removePaletteChip()
+                showCollapsedPaletteChip()
+            }
+
+            bubbleView != null -> {
+                removeBubble()
+                showBubble()
+            }
+
+            else -> refreshCompactDrawingToggleViews()
+        }
     }
 
     private fun ensureCompactDrawingCanvas() {
