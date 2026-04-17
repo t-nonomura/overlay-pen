@@ -176,7 +176,7 @@ class OverlayCanvasView @JvmOverloads constructor(
         paint.strokeWidth = stroke.strokeWidthDp.dpToPx(context)
         paint.blendMode = if (stroke.isEraser) BlendMode.CLEAR else BlendMode.SRC_OVER
         paint.pathEffect = if (!stroke.isEraser && stroke.penType == PenType.DASHED) {
-            DashPathEffect(floatArrayOf(24f, 18f), 0f)
+            dashedPathEffect(stroke.strokeWidthDp)
         } else {
             null
         }
@@ -189,6 +189,12 @@ class OverlayCanvasView @JvmOverloads constructor(
 
             else -> stroke.color.withAlpha(stroke.opacity)
         }
+    }
+
+    private fun dashedPathEffect(strokeWidthDp: Float): DashPathEffect {
+        val dashLengthPx = (strokeWidthDp * 2.8f).coerceIn(14f, 30f).dpToPx(context)
+        val gapLengthPx = (strokeWidthDp * 2.2f).coerceIn(10f, 24f).dpToPx(context)
+        return DashPathEffect(floatArrayOf(dashLengthPx, gapLengthPx), 0f)
     }
 
     private fun Int.withAlpha(opacity: Float): Int {
