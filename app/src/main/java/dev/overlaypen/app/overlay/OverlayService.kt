@@ -357,7 +357,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             fallbackHeightPx = expandedPaletteFallbackHeightPx,
             minimumVisibleWidthPx = expandedPaletteMinimumVisibleWidthPx,
             minimumVisibleHeightPx = expandedPaletteMinimumVisibleHeightPx,
-            snapToHorizontalEdge = true,
+            snapToHorizontalEdge = false,
             bottomMarginPx = 0,
         ) { x, y ->
             palettePositionX = x
