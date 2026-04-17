@@ -670,8 +670,11 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
                             params.y = coordinates.y
                             windowManager.updateViewLayout(windowView, params)
                             onPositionChanged(params.x, params.y)
-                        } else if (!dragging && windowView === view) {
-                            windowView.performClick()
+                        } else if (!dragging) {
+                            val handled = view.performClick()
+                            if (!handled && windowView !== view) {
+                                windowView.performClick()
+                            }
                         }
                         return true
                     }
