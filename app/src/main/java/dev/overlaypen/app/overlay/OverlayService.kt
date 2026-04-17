@@ -208,7 +208,6 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
             passiveCanvasView,
             createFullscreenParams(
                 flags = WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                alpha = PASSIVE_OVERLAY_ALPHA,
             ),
         )
     }
@@ -256,10 +255,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
         }
     }
 
-    private fun createFullscreenParams(
-        flags: Int,
-        alpha: Float = 1f,
-    ): WindowManager.LayoutParams {
+    private fun createFullscreenParams(flags: Int): WindowManager.LayoutParams {
         return WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.MATCH_PARENT,
@@ -269,7 +265,6 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
         ).apply {
             gravity = Gravity.TOP or Gravity.START
             layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
-            this.alpha = alpha
         }
     }
 
@@ -734,8 +729,6 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
 
         private const val CHANNEL_ID = "overlay_pen_session"
         private const val NOTIFICATION_ID = 4207
-        private const val PASSIVE_OVERLAY_ALPHA = 0.78f
-
         fun createIntent(context: Context, action: String): Intent {
             return Intent(context, OverlayService::class.java).setAction(action)
         }

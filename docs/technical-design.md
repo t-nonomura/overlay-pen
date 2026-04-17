@@ -65,7 +65,7 @@
 3. Passive Annotation
    - 描画だけを残す
    - compact な `Tools` チップを表示
-   - overlay alpha は `0.78`
+   - 描画の見え方はそのまま維持する
 4. Stopped
    - window とセッションを終了
 
@@ -79,7 +79,7 @@
 ## Tradeoffs Accepted For V1
 
 - 保存や共有は V1 では扱わない
-- Passive Annotation では下位アプリ操作を優先して alpha `0.78` を採用する
+- Passive Annotation でもユーザーが選んだ不透明度を維持する
 - 一部アプリで overlay が隠される可能性は既知制約として扱う
 
 ## Validation Status

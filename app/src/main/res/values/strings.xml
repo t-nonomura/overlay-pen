@@ -26,7 +26,7 @@
     <string name="spec_card_title">主な機能</string>
     <string name="spec_line_1">フローティングボタンから、どのアプリ上でも描画モードを開けます。</string>
     <string name="spec_line_2">描画中は下のアプリを誤操作しないよう、タッチをブロックします。</string>
-    <string name="spec_line_3">表示専用モードでは、ウィンドウ alpha を 0.78 に固定して描画を残します。</string>
+    <string name="spec_line_3">表示専用モードでは、現在の描画の見え方を保ったまま画面に残します。</string>
     <string name="spec_line_4">ツールパネルはドラッグして描画の邪魔にならない位置へ移動できます。</string>
     <string name="spec_line_5">非表示にすると、コンパクトなツールボタンに切り替わり、下のアプリを操作できます。</string>
     <string name="spec_line_6">全消しはセッションを終了させずに、描画だけを消します。</string>
