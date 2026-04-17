@@ -30,7 +30,7 @@
     <string name="spec_line_4">ツールパネルはドラッグして描画の邪魔にならない位置へ移動できます。</string>
     <string name="spec_line_5">非表示にすると、コンパクトなツールボタンに切り替わり、下のアプリを操作できます。</string>
     <string name="spec_line_6">全消しはセッションを終了させずに、描画だけを消します。</string>
-    <string name="spec_line_7">セッションを終了すると、描画はメモリから完全に消えます。</string>
+    <string name="spec_line_7">セッションを終了すると、描画は保存されません。</string>
     <string name="spec_line_8">ペン、消しゴム、アンドゥ、リドゥ、全消し、太さ、不透明度、線の種類を使えます。</string>
     <string name="palette_title">最前面ペン</string>
     <string name="palette_move">移動</string>
