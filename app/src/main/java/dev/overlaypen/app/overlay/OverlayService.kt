@@ -39,6 +39,8 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
     private var drawingCanvasView: OverlayCanvasView? = null
     private var toolPaletteView: ToolPaletteView? = null
     private var paletteChipView: View? = null
+    private var bubbleToggleView: TextView? = null
+    private var paletteChipToggleView: TextView? = null
     private var bubblePositionX: Int? = null
     private var bubblePositionY: Int? = null
     private var palettePositionX: Int? = null
@@ -63,6 +65,12 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
 
     private val expandedPaletteFallbackHeightPx: Int
         get() = dp(360)
+
+    private val compactChipFallbackWidthPx: Int
+        get() = dp(196)
+
+    private val compactChipFallbackHeightPx: Int
+        get() = dp(58)
 
     override fun onCreate() {
         super.onCreate()
@@ -209,6 +217,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
         bubbleView?.let { windowManager.removeView(it) }
         bubbleView = null
         bubbleParams = null
+        bubbleToggleView = null
     }
 
     private fun removePassiveCanvas() {
@@ -231,39 +240,19 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
     }
 
     private fun createBubbleView(params: WindowManager.LayoutParams): View {
-        return LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            setPadding(dp(12), dp(10), dp(14), dp(10))
-            background = getDrawable(R.drawable.floating_bubble_bg)
-            elevation = 20f
-            setOnClickListener { enterDrawingMode() }
-
-            addView(
-                createLauncherIconView(
-                    sizeDp = 38,
-                    iconSizeDp = 18,
-                ),
-            )
-
-            addView(
-                createLauncherLabelView(
-                    text = getString(R.string.bubble_label),
-                    textSizeSp = 14f,
-                ),
-            )
-        }.also { bubble ->
-            attachDragTouchListener(
-                touchTargets = listOf(bubble),
-                windowView = bubble,
-                params = params,
-                fallbackWidthPx = dp(126),
-                fallbackHeightPx = dp(58),
-                snapToHorizontalEdge = false,
-            ) { x, y ->
-                bubblePositionX = x
-                bubblePositionY = y
-            }
+        return createCompactChipView(
+            params = params,
+            backgroundRes = R.drawable.floating_bubble_bg,
+            iconContainerSizeDp = 38,
+            iconSizeDp = 18,
+            labelTextSizeSp = 14f,
+            fallbackWidthPx = compactChipFallbackWidthPx,
+            fallbackHeightPx = compactChipFallbackHeightPx,
+            onLauncherClicked = { enterDrawingMode() },
+            onToggleBound = { bubbleToggleView = it },
+        ) { x, y ->
+            bubblePositionX = x
+            bubblePositionY = y
         }
     }
 
@@ -399,36 +388,65 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
     private fun removePaletteChip() {
         paletteChipView?.let { windowManager.removeView(it) }
         paletteChipView = null
+        paletteChipToggleView = null
     }
 
     private fun createPaletteChipView(params: WindowManager.LayoutParams): View {
+        return createCompactChipView(
+            params = params,
+            backgroundRes = R.drawable.overlay_chip_bg,
+            iconContainerSizeDp = 34,
+            iconSizeDp = 16,
+            labelTextSizeSp = 13f,
+            fallbackWidthPx = compactChipFallbackWidthPx,
+            fallbackHeightPx = dp(54),
+            onLauncherClicked = {
+                paletteCollapsed = false
+                compactDrawingEnabled = false
+                enterDrawingMode()
+            },
+            onToggleBound = { paletteChipToggleView = it },
+        ) { x, y ->
+            bubblePositionX = x
+            bubblePositionY = y
+        }
+    }
+
+    private fun createCompactChipView(
+        params: WindowManager.LayoutParams,
+        backgroundRes: Int,
+        iconContainerSizeDp: Int,
+        iconSizeDp: Int,
+        labelTextSizeSp: Float,
+        fallbackWidthPx: Int,
+        fallbackHeightPx: Int,
+        onLauncherClicked: () -> Unit,
+        onToggleBound: (TextView) -> Unit,
+        onPositionChanged: (x: Int, y: Int) -> Unit,
+    ): View {
         return LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             setPadding(dp(12), dp(10), dp(14), dp(10))
-            background = getDrawable(R.drawable.overlay_chip_bg)
+            background = getDrawable(backgroundRes)
             elevation = 18f
 
             val launcherBody = LinearLayout(context).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
-                setOnClickListener {
-                    paletteCollapsed = false
-                    compactDrawingEnabled = false
-                    enterDrawingMode()
-                }
+                setOnClickListener { onLauncherClicked() }
 
                 addView(
                     createLauncherIconView(
-                        sizeDp = 34,
-                        iconSizeDp = 16,
+                        sizeDp = iconContainerSizeDp,
+                        iconSizeDp = iconSizeDp,
                     ),
                 )
 
                 addView(
                     createLauncherLabelView(
                         text = getString(R.string.bubble_label),
-                        textSizeSp = 13f,
+                        textSizeSp = labelTextSizeSp,
                     ),
                 )
             }
@@ -439,6 +457,7 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
                     post { setCompactDrawingEnabled(!compactDrawingEnabled) }
                 }
             }
+            onToggleBound(toggleButton)
 
             addView(launcherBody)
             addView(
@@ -452,12 +471,11 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
                 touchTargets = listOf(chip.getChildAt(0)),
                 windowView = chip,
                 params = params,
-                fallbackWidthPx = dp(180),
-                fallbackHeightPx = dp(54),
+                fallbackWidthPx = fallbackWidthPx,
+                fallbackHeightPx = fallbackHeightPx,
                 snapToHorizontalEdge = false,
             ) { x, y ->
-                bubblePositionX = x
-                bubblePositionY = y
+                onPositionChanged(x, y)
             }
         }
     }
@@ -491,10 +509,16 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
                 removePassiveCanvas()
             }
         }
+        refreshCompactDrawingToggleViews()
         if (paletteCollapsed) {
             removePaletteChip()
             showCollapsedPaletteChip()
         }
+    }
+
+    private fun refreshCompactDrawingToggleViews() {
+        bubbleToggleView?.updateCompactDrawingToggle()
+        paletteChipToggleView?.updateCompactDrawingToggle()
     }
 
     private fun ensureCompactDrawingCanvas() {
