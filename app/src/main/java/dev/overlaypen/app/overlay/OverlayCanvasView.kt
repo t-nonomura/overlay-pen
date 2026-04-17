@@ -192,8 +192,9 @@ class OverlayCanvasView @JvmOverloads constructor(
     }
 
     private fun dashedPathEffect(strokeWidthDp: Float): DashPathEffect {
-        val dashLengthPx = (strokeWidthDp * 2.8f).coerceIn(14f, 30f).dpToPx(context)
-        val gapLengthPx = (strokeWidthDp * 2.2f).coerceIn(10f, 24f).dpToPx(context)
+        val dashPatternDp = StrokeStyleMetrics.dashedPatternDp(strokeWidthDp)
+        val dashLengthPx = dashPatternDp[0].dpToPx(context)
+        val gapLengthPx = dashPatternDp[1].dpToPx(context)
         return DashPathEffect(floatArrayOf(dashLengthPx, gapLengthPx), 0f)
     }
 
