@@ -29,7 +29,7 @@
 
 - foreground service の常駐
 - bubble、canvas、palette、chip の lifecycle 管理
-- `Hide`、`Resume`、`Clear`、`Stop` の遷移管理
+- `最小化`、`Resume`、`Clear`、`Stop` の遷移管理
 
 ### `DrawingSessionStore`
 
@@ -53,7 +53,7 @@
 - 全消し
 - 線種切り替え
 - 太さ、不透明度、色の調整
-- `Hide` と `Close`
+- `最小化` と `Close`
 
 ## Overlay States
 
@@ -71,7 +71,7 @@
 
 ## Implemented Behavior Notes
 
-- `Hide` では interactive canvas を閉じ、描画だけを残す
+- `最小化` では interactive canvas を閉じ、描画だけを残す
 - `Clear` はセッションを維持したまま描画だけを消す
 - セッション終了時は描画を完全に破棄する
 - bubble と chip の位置はドラッグ位置を保持する
