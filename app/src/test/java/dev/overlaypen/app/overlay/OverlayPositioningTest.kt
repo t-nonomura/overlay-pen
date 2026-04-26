@@ -94,4 +94,14 @@ class OverlayPositioningTest {
 
         assertEquals(944, snappedX)
     }
+
+    @Test
+    fun defaultCenteredXPlacesOverlayAtScreenCenter() {
+        val x = OverlayPositioning.defaultCenteredX(
+            screenWidth = 1080,
+            overlayWidth = 288,
+        )
+
+        assertEquals(396, x)
+    }
 }

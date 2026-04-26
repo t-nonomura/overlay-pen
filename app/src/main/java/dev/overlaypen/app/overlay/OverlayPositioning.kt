@@ -53,4 +53,11 @@ object OverlayPositioning {
     ): Int {
         return (screenWidth - overlayWidth - horizontalMargin).coerceAtLeast(horizontalMargin)
     }
+
+    fun defaultCenteredX(
+        screenWidth: Int,
+        overlayWidth: Int,
+    ): Int {
+        return (screenWidth - overlayWidth) / 2
+    }
 }

@@ -168,14 +168,10 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
 
     private fun collapseIntoPassiveToolsChip() {
         paletteCollapsed = true
-        compactDrawingEnabled = false
+        compactDrawingEnabled = true
         removeExpandedPalette()
-        removeCompactDrawingCanvas()
-        if (session.hasStrokes()) {
-            showPassiveCanvas()
-        } else {
-            removePassiveCanvas()
-        }
+        removePassiveCanvas()
+        ensureCompactDrawingCanvas()
         showCollapsedPaletteChip()
     }
 
@@ -702,10 +698,9 @@ class OverlayService : Service(), ToolPaletteView.Callbacks {
     }
 
     private fun defaultPaletteX(): Int {
-        return OverlayPositioning.defaultRightDock(
+        return OverlayPositioning.defaultCenteredX(
             screenWidth = screenWidthPx(),
             overlayWidth = expandedPaletteFallbackWidthPx,
-            horizontalMargin = horizontalMarginPx,
         )
     }
 
